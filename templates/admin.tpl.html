@@ -1,0 +1,32 @@
+{#
+   This file is part of the Exposure package.
+
+   Copyright 2013 by Sébastien Pujadas
+
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+#}
+
+{% from 'form_macros.tpl.html' import error, autofill, autofill_or_value %}
+
+{% extends "page-admin.tpl.html" %}
+
+{% block content %}
+
+<h1>Admin dashboard</h1>
+<h2>Notifications</h2>
+{% if admin.notifications|length == 0 %}
+	<p>No notifications</p>
+{% else %}
+	<p><a href="/admin-notifications">All notifications</a></p>
+	<ul id="notifications" class="list-group" data-hide-archived-notifications="true" data-token="{{ session.token }}">
+	{% for notification in admin.notifications if notification.status != constant('\\Exposure\\Model\\Notification::STATUS_ARCHIVED') %}
+		{% include 'admin-notification-item.inc.tpl.html' %}
+	{% endfor %}
+	</ul>
+	<p id="no-notifications">No notifications</p>
+{% endif %}
+
+<script type="text/javascript" src="/assets/js/admin-notifications.js"></script>
+
+{% endblock %}

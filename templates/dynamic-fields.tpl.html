@@ -1,0 +1,84 @@
+{#
+   This file is part of the Exposure package.
+
+   Copyright 2013 by Sébastien Pujadas
+
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+#}
+
+{# Don't try this at home... ever! #}
+
+{% block preLoad %}{% endblock %}
+<script type="text/javascript">
+$(function(){
+  var numDivs = {{ numDivs }};
+  var maxNumDivs = {{ maxNumDivs }};
+
+  var rootDivId = '{{ rootDivId|raw }}' ;
+  var baseDiv = '{{ baseDiv|raw }}' ;
+  var activeFieldSelector = '{{ activeFieldSelector|raw }}' ;
+  var activeIdValue = '{{ activeIdValue }}' ;
+  var deleteItem = '{{ deleteItem|raw }}' ;
+
+  $('#' + rootDivId + '> div').each(function() {
+    makeDivDeletable($(this));
+    {% block initDivPreHook %}{% endblock %}
+  }) ;
+
+  if (numDivs < maxNumDivs) {
+      addDiv() ;
+  }
+  
+  function updateDivAfterFieldChange(div) {
+    // if this field is active
+    if (div.find(activeFieldSelector).attr('id') == activeIdValue) {
+      // append delete icon to current item
+      makeDivDeletable(div) ;
+      
+      // remove div handler and deactivate field
+      div.find(activeFieldSelector).off('change', null, addDivHandler) ;
+      div.find(activeFieldSelector).removeAttr('id') ;
+
+      // add new div unless maxNumDivs reached
+      if (numDivs < maxNumDivs) {
+        addDiv() ;
+      }
+    }
+  }
+
+  function makeDivDeletable(div) {
+    var di = $(deleteItem);
+    div.append(di) ;
+    di.click(function(){
+      removeDiv(div) ;
+    }) ;
+  }
+
+  function removeDiv(div) {
+    {% block removeDiv %}
+    div.remove();
+    numDivs--;
+    // if no active field left, add one
+    if ($('#' + rootDivId + ' > div:last ' + activeFieldSelector).attr('id') != activeIdValue) {
+      addDiv() ;
+    }
+    {% endblock %}
+  }
+
+  function addDiv() {
+    numDivs++;
+    var bi = $(baseDiv);
+    $('#' + rootDivId).append(bi);
+    bi.find(activeFieldSelector).attr('id', activeIdValue) ;
+    bi.find(activeFieldSelector).on('change', addDivHandler) ;
+    {% block addDivPostHook %}{% endblock %}
+  }
+
+  function addDivHandler(event) {
+    updateDivAfterFieldChange($('#' + rootDivId + ' > div:last')) ;
+  }
+
+  {% block callbackFunctions %}{% endblock %}
+});
+</script>

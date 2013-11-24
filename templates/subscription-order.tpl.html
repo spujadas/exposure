@@ -1,0 +1,57 @@
+{#
+   This file is part of the Exposure package.
+
+   Copyright 2013 by Sébastien Pujadas
+
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+#}
+
+{% extends "page-left-nav.tpl.html" %}
+
+{% block content %}
+<h1>Order recap</h1>
+
+<h2>Selected subscription</h2>
+
+{% set monthlyPrice = subscription.monthlyPrice %}
+{% set value = monthlyPrice.valueByCurrencyCode(session.currency, true) %}
+{% set currencyCode = monthlyPrice.currencyCode(session.currency) %}
+
+<ul>
+	<li>{{subscription.durationInMonths}} months</li>
+	<li>Total: {{ subscription.durationInMonths * value}}{{ monthlyPrice.symbol(currencyCode) }} (soit {{ value }}{{monthlyPrice.symbol(currencyCode)}} per month)</li>
+</ul>
+
+{% if user.billingAddress is null %}
+	<p><a href="/billing-address-edit/{{subscription.id}}">Define billing address</a></p>
+{% else %}
+<h3>Billing address</h3>
+	<p>{{user.name}} {{user.surname}}</p>
+	<p>{{user.billingAddress.address1}}</p>
+	{% if user.billingAddress.address2 is not null %}
+		<p>{{user.billingAddress.address2}}</p>
+	{% endif %}
+	{% if user.billingAddress.cityAreaOrDistrict is not null %}
+		<p>{{user.billingAddress.cityAreaOrDistrict}}</p>
+	{% endif %}
+	<p>{{user.billingAddress.postCode}}</p>
+	<p>{{user.billingAddress.cityOrTownOrVillage}}</p>
+	{% if user.billingAddress.county is not null %}
+		<p>{{user.billingAddress.county}}</p>
+	{% endif %}
+	<p>{{user.billingAddress.country.name.stringByLanguageCode(session.language)}}</p>
+
+	<p><a href="/billing-address-edit/{{subscription.id}}">Update billing address</a></p>
+	<form role="form" class="form-horizontal" method="post" action="/">
+		<button type="submit" class="btn btn-primary">Subscribe</button>
+		<input type="hidden" name="user_id" value="{{ user.id }}" />
+		<input type="hidden" name="subscription_id" value="{{ subscription.id }}" />
+		<input type="hidden" name="token" value="{{ session.token }}" />
+		<input type="hidden" name="action" value="subscription_pay" />
+	</form>
+{% endif %}
+
+<p><a href="/subscribe">Cancel</a></p>
+
+{% endblock %}

@@ -1,0 +1,33 @@
+{#
+   This file is part of the Exposure package.
+
+   Copyright 2013 by Sébastien Pujadas
+
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+#}
+
+{% from 'view_macros.tpl.html' import currency_value %}
+
+{% set need = contribution.contributedNeed %}
+{% set return = need.return %}
+
+<li class="list-group-item">
+	<p>{% if need.type == constant('\\Exposure\\Model\\ProjectNeed::TYPE_FINANCIAL') %}
+	Need: {{currency_value(need.amount, session.currency)}} – {{need.description.stringByLanguageCode(session.language)}}
+	{% else %}
+	{{need.description.stringByLanguageCode(session.language)}}
+	{% endif %}</p>
+	<p><a href="/return/{{return.id}}">Compensation</a>: {{return.description.stringByLanguageCode(session.language)}}
+	–
+	{% if return.status == constant('\\Exposure\\Model\\SponsorReturn::STATUS_NOT_STARTED') %}
+	Not started
+	{% elseif return.status == constant('\\Exposure\\Model\\SponsorReturn::STATUS_IN_PROGRESS') %}
+	In progress
+	{% elseif return.status == constant('\\Exposure\\Model\\SponsorReturn::STATUS_COMPLETED_BY_PROJECT_OWNER') %}
+	Completed by project team
+	{% elseif return.status == constant('\\Exposure\\Model\\SponsorReturn::STATUS_APPROVED') %}
+	Approved by {{ contribution.contributor.name }}
+	{% endif %}
+	</p>
+</li>

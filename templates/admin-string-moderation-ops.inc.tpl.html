@@ -1,0 +1,26 @@
+{#
+   This file is part of the Exposure package.
+
+   Copyright 2013 by Sébastien Pujadas
+
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+#}
+
+<div class="moderation-ops">
+	<span class="status">
+	{% if string.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_SUBMITTED') %}
+		Submitted for publication
+	{% elseif string.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_APPROVED') %}
+		Approved
+	{% elseif string.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_USER_EDIT') %}
+		Being edited by the user
+	{% endif %}
+	</span>
+	<a data-op="approve" data-success="Approved" href="#">Approve</a>
+	<a data-op="request_editing" data-success="Being edited by the user" href="#">Request editing</a>
+	<input type="hidden" name="project_id" value="{{ project.id }}" />
+	<input type="hidden" name="string" value="{{stringname}}" />
+	<input type="hidden" name="token" value="{{ session.token }}" />
+	<input type="hidden" name="action" value="admin_project_moderate_string" />
+</div>

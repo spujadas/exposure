@@ -1,0 +1,36 @@
+{#
+   This file is part of the Exposure package.
+
+   Copyright 2013 by Sébastien Pujadas
+
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+#}
+
+{% extends "page-left-nav.tpl.html" %}
+
+{% block content %}
+{% set unreadNotificationCount = user.notificationCount([constant('\\Exposure\\Model\\Notification::STATUS_UNREAD')]) %}
+{% set visibleNotificationCount = user.notificationCount([constant('\\Exposure\\Model\\Notification::STATUS_UNREAD'), constant('\\Exposure\\Model\\Notification::STATUS_READ')]) %}
+
+{% block first_time_content %}{% endblock %}
+
+<h1>Notifications</h1>
+{% if visibleNotificationCount == 0 %}
+	<p>No notifications.</p>
+{% else %}
+	<p><strong>You have <span id="unread-notifications-count">{{unreadNotificationCount}}</span> unread notification{% if unreadNotificationCount > 1%}s{% endif %}.</strong></p>
+	<p><a href="/notifications">See all my notifications</a></p>
+	<ul id="notifications" class="list-group" data-hide-archived-notifications="true" data-token="{{ session.token }}">
+		{% for notification in user.notifications %}
+			{% include 'notification-item.inc.tpl.html' %}
+		{% endfor %}
+		{% block other_notifications %}{% endblock %}
+	</ul>
+	<p id="no-notifications">No notifications.</p>
+{% endif %}
+<script type="text/javascript" src="/assets/js/notifications.js"></script>
+
+{% block other_content %}{% endblock %}
+
+{% endblock %}

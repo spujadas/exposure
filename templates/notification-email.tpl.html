@@ -1,0 +1,22 @@
+{#
+   This file is part of the Exposure package.
+
+   Copyright 2013 by Sébastien Pujadas
+
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+#}
+
+{% block subject %}{% set appName = 'Exposure' %}{{appName}} - {% endblock %}
+
+{% block body_html %}
+{% set appName = 'Exposure' %}
+
+<p>You are receiving this message from {{appName}} because you have enabled email notifications in your profile. If you do not wish to receive these notifications then please <a href="{{ profileEditUrl }}">edit your user preferences</a>.</p>
+{% endblock %}
+
+{% block body_text %}
+{% set appName = 'Exposure' %}
+
+You are receiving this message from {{appName}} because you have enabled email notifications in your profile. If you do not wish to receive these notifications then please edit your user preferences by following this link: {{ profileEditUrl }}
+{% endblock %}

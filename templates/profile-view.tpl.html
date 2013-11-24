@@ -1,0 +1,92 @@
+{#
+   This file is part of the Exposure package.
+
+   Copyright 2013 by Sébastien Pujadas
+
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+#}
+
+{% extends "page-left-nav.tpl.html" %}
+
+{% block content %}
+
+<h1>{{user.name}} {{user.surname}}{% if viewedUserIsSignedIn %}
+	{% if user.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_FIRST_USER_EDIT') %}
+	<span class="label label-warning">Unpublished</span>
+	{% elseif user.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_USER_EDIT') %}
+	<span class="label label-warning">Changed since last publication</span>
+	{% elseif user.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_APPROVED') %}
+	<span class="label label-success">Published</span>
+	{% elseif (user.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_SUBMITTED'))
+		or (user.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_SUBMITTED_FIRST_TIME')) %}
+	<span class="label label-info">Pending moderation</span>
+	{% elseif user.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_FLAGGED') %}
+	<span class="label label-warning">Flagged as inappropriate</span>
+	{% elseif user.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_REJECTED') %}
+	<span class="label label-danger">Rejected</span>
+	{% endif %}
+{% endif %}</h1>
+
+{% if viewedUserIsSignedIn %}
+<h2>Profile</h2>
+<p><a href="/profile-edit">Edit profile</a></p>
+{% endif %}
+
+<h4>Photo</h4>
+<img src="/profile-photo/{{user.id}}" width="120" alt="{{user.name}} {{user.surname}}"/>
+
+<h4>Registration date</h4>
+<p>{{user.registrationDateTime|date('d/m/Y')}}</p>
+
+{% if (user.type ==  constant('\\Exposure\\Model\\User::TYPE_PROJECT_OWNER')) and (user.currentSubscription is not null) %}
+<h4>Subscription start date</h4>
+<p>{{user.currentSubscription.startDateTime|date('d/m/Y')}}</p>
+{% endif %}
+
+{% if viewedUserIsSignedIn %}
+
+<h4>Email</h4>
+<p>{{user.email}}</p>
+{% endif %}
+
+<h4>Location</h4>
+<p>{{ locationtree|join(' > ') }}</p>
+
+<h4>Presentation</h4>
+<p>{{user.presentation.stringByLanguageCode(session.language)}}</p>
+
+{% if user.type == constant('\\Exposure\\Model\\User::TYPE_PROJECT_OWNER') and not viewedUserIsSignedIn %}
+	<h4>Projects</h4>
+	<ul>
+	{% for project in user.ownedProjects
+		if (project.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_USER_EDIT'))
+			or (project.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_APPROVED')) %}
+		<li><a href="/project/{{project.urlSlug}}">{{project.name}}</a></li>
+	{% else %}
+		<li>No projects.</li>
+	{% endfor %}
+	</ul>
+{% elseif user.type == constant('\\Exposure\\Model\\User::TYPE_SPONSOR') %}
+	<h4>Organisations</h4>
+	<ul>
+		{% for organisation in user.sponsorOrganisations %}
+			<li><a href="/organisation/{{organisation.urlSlug}}">{{organisation.name}}</a></li>
+		{% endfor %}
+	</ul>
+{% endif %}
+
+{% if viewedUserIsSignedIn %}
+	{% if user.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_USER_EDIT') %}
+		<form role="form" class="form-horizontal" method="post" action="/">
+		<button type="submit" class="btn btn-primary">Publish</button>
+		<input type="hidden" name="token" value="{{ session.token }}" />
+		<input type="hidden" name="action" value="profile_publish" />
+		</form>
+	{% endif %}
+
+	<h2>Preferences</h2>
+	<p><a href="/preferences-edit">Edit preferences</a></p>
+{% endif %}
+
+{% endblock %}

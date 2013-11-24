@@ -1,0 +1,26 @@
+{#
+   This file is part of the Exposure package.
+
+   Copyright 2013 by Sébastien Pujadas
+
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+#}
+
+<div class="navbar navbar-default">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="/admin"><img src="/assets/images/logo.png" height="90" alt="logo {{appName}}"/></a>
+	</div>
+
+{% if session.adminuser is defined %}
+	<ul class="nav navbar-nav navbar-right">
+		<li>
+			<form role="form" class="form-horizontal" method="post" action="/">
+				<button type="submit" class="btn btn-primary">Sign out (admin)</button>
+				<input type="hidden" name="token" value="{{ session.token }}" />
+				<input type="hidden" name="action" value="admin_signout" />
+			</form>
+		</li>
+	</ul>
+{% endif %}
+</div> <!-- navbar -->

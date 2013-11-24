@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+   This file is part of the Exposure package.
+ 
+   Copyright 2013 by Sébastien Pujadas
+ 
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+-->
+
+<doctrine-mongo-mapping xmlns="http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping"
+                        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                        xsi:schemaLocation="http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping
+                    http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping.xsd">
+
+    <document name="Exposure\Model\User" collection="businessusers">
+        <!-- single use -->
+        <embed-one field="emailConfirmationCode" target-document="Sociable\Model\ConfirmationCode" />
+        <embed-one field="passwordResetCode" target-document="Sociable\Model\ConfirmationCode" />
+        <field name="firstTime" type="string"/>
+
+        <!-- mandatory -->
+        <field name="status" type="string"/>
+        <embed-one field="moderationStatus" target-document="Exposure\Model\ModerationStatus" />
+        <field name="registrationDateTime" type="date" />
+        <field name="type" type="string"/>
+        <embed-one field="presentation" target-document="Sociable\Model\MultiLanguageString"/>
+        <field name="languageCode" type="string"/>
+        <field name="currencyCode" type="string"/>
+        <reference-one field="photo" target-document="Sociable\Model\LabelledImage"/>
+        <reference-one field="place">
+            <discriminator-map>
+                <discriminator-mapping value="location" class="Sociable\Model\Location" />
+                <discriminator-mapping value="country" class="Sociable\Model\Country" />
+            </discriminator-map>
+        </reference-one>
+
+        <!-- project owners only -->
+        <reference-many field="ownedProjects" target-document="Exposure\Model\Project" inversed-by="owners"/>
+        <embed-one field="projectOwnerPreferences" target-document="Exposure\Model\ProjectOwnerPreferences" />
+        <reference-many field="tempDraftProjectPhotos" target-document="Sociable\Model\LabelledImage"/>
+        <reference-many field="visibleSponsorOrganisations" target-document="Exposure\Model\SponsorOrganisation"/>
+
+        <!-- sponsors only -->
+        <reference-many field="sponsorOrganisations" target-document="Exposure\Model\SponsorOrganisation" mapped-by="sponsorUsers"/>
+        <embed-one field="sponsorUserPreferences" target-document="Exposure\Model\SponsorUserPreferences" />
+        <reference-many field="bookmarkedProjects" target-document="Exposure\Model\Project"/>
+
+        <!-- optional -->
+        <reference-many field="notifications">
+            <discriminator-map>
+                <discriminator-mapping value="profileModeration" class="Exposure\Model\ProfileModerationNotification" />
+                <discriminator-mapping value="projectThemeSuggestion" class="Exposure\Model\ProjectThemeSuggestionNotification" />
+            </discriminator-map>
+        </reference-many>
+        <embed-one field="billingAddress" target-document="Sociable\Model\Address"/>
+        <reference-one field="nextSubscription" target-document="Exposure\Model\Subscription"/>
+        <reference-one field="currentSubscription" target-document="Exposure\Model\Subscription"/>
+        <reference-many field="pastSubscriptions" target-document="Exposure\Model\Subscription"/>
+        <reference-many field="commentsOnProjectOwner" target-document="Exposure\Model\CommentOnProjectOwner" mapped-by="projectOwner"/>
+    </document>
+
+</doctrine-mongo-mapping>

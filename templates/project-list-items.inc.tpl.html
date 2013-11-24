@@ -1,0 +1,27 @@
+{#
+   This file is part of the Exposure package.
+
+   Copyright 2013 by Sébastien Pujadas
+
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+#}
+
+{% for project in projects %}
+<div class="col-md-3">
+	<div class="panel panel-default">
+		<div class="panel-body">
+			<img src="/project-photo/{{project.urlSlug}}/{{project.photos[0].id}}" 
+				class="img-rounded" style="width: 100%" 
+				alt="{{project.photos[0].latestApproved.description.stringByLanguageCode(session.language)}}"/>
+		</div>
+		<div class="panel-footer">
+			<h3><a href="/project/{{project.urlSlug}}">{{project.name}}</a></h3>
+			<div class="row">
+				<div class="col-md-6">{{project.pageviews}} views</div>
+			    <div class="col-md-6">{{project.theme.topLevelTheme.name.stringByLanguageCode(session.language)}}</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endfor %}

@@ -1,0 +1,28 @@
+{#
+   This file is part of the Exposure package.
+
+   Copyright 2013 by Sébastien Pujadas
+
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+#}
+
+{% from 'form_macros.tpl.html' import error, error_class %}
+
+{% for themetreeitem in themetree %}
+  <div class="form-group{% if (locationtreeitem.formName == 'theme') %} {{ error_class(session.errors, 'theme') }} {% endif %}">
+    <label class="col-lg-2 control-label" for="{{themetreeitem.formName}}">{{themetreeitem.name}}</label>
+    <div class="col-lg-10">
+      <select class="form-control" name="{{themetreeitem.formName}}" id="{{themetreeitem.formName}}">
+        <option value=""{% if (themetreeitem.current is defined) and (themetreeitem.current == "") %} selected="selected"{% endif %}></option>
+        {% for theme in themetreeitem.themes %}
+          <option value="{{ theme.label }}"{% if (themetreeitem.current is defined) and (themetreeitem.current == theme.label) %} selected="selected"{% endif %}>{{theme.name.stringByLanguageCode(session.language)}}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  {% if (themetreeitem.formName == 'theme') %} {{ error(session.errors, 'theme') }} {% endif %}
+{% endfor %}
+
+<script type="text/javascript" src="/assets/js/indexOf.js"></script>
+<script type="text/javascript" src="/assets/js/theme.js"></script>

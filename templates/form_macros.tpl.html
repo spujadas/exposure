@@ -1,0 +1,28 @@
+{#
+   This file is part of the Exposure package.
+
+   Copyright 2013 by Sébastien Pujadas
+
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+#}
+
+{% macro error(error_array, key) %}
+{% if error_array[key] is defined %}<span class="help-block">{{ error_array[key] }}</span>{% endif %}
+{% endmacro %}
+
+{% macro error_class(error_array, key) %}
+{% if error_array[key] is defined %} has-error{% endif %}
+{% endmacro %}
+
+{% macro autofill(autofill_array, key) %}
+{% if autofill_array[key] is defined %}{{ autofill_array[key] }}{% endif %}
+{% endmacro %}
+
+{% macro autofill_or_value(autofill_array, key, value) %}
+{% if autofill_array[key] is defined %}{{ autofill_array[key] }}{% elseif value is defined %}{{ value }}{% endif %}
+{% endmacro %}
+
+{% macro value_if_autofill_or_boolean(autofill_array, key, boolean, value) %}
+{% if autofill_array[key] is defined %}{% if autofill_array[key] %}{{ value|raw }}{% endif %}{% elseif boolean %}{{ value|raw }}{% endif %}
+{% endmacro %}

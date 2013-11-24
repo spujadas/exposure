@@ -1,0 +1,72 @@
+{#
+   This file is part of the Exposure package.
+
+   Copyright 2013 by Sébastien Pujadas
+
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+#}
+
+<li class="notification list-group-item" 
+	data-notification-type="{{ notification.type }}" 
+	data-notification-id="{{ notification.id }}">
+	<div class="notification-header">
+		<div class="notification-type">
+			{% if notification.status == constant('\\Exposure\\Model\\Notification::STATUS_UNREAD') %}
+				<span class="notification-unread">
+			{% elseif notification.status == constant('\\Exposure\\Model\\Notification::STATUS_ARCHIVED') %}
+				<span class="notification-archived">
+			{% else %}
+				<span class="notification-read">
+			{% endif %}
+			{% if notification.type == constant('\\Exposure\\Model\\Notification::TYPE_PROJECT_THEME_SUGGESTION') %}
+				Theme suggestion (not implemented)
+			{% elseif notification.type == constant('\\Exposure\\Model\\Notification::TYPE_PROJECT_MODERATION') %}
+				<a data-op="notification-read" href="/admin-project-moderate/{{notification.project.urlSlug}}">Project moderation</a> – {{notification.content}}
+			{% elseif notification.type == constant('\\Exposure\\Model\\Notification::TYPE_PROFILE_MODERATION') %}
+				<a data-op="notification-read" href="/admin-profile-moderate/{{notification.user.id}}">Profile moderation</a> – {{notification.content}}
+			{% endif %}
+				</span>
+			{% if notification.status == constant('\\Exposure\\Model\\Notification::STATUS_UNREAD') %}
+				<span class="label label-info">unread</span>
+			{% endif %}
+		</div>
+
+		{% if notification.status != constant('\\Exposure\\Model\\Notification::STATUS_UNREAD') %}
+		<div class="notification-ops">
+			<a data-op="notification-archive" href="#">Archive</a>
+			<a data-op="notification-delete" href="#">Delete</a>
+		</div>
+		{% endif %}
+
+		<div class="notification-date">
+			{{notification.dateTime|date}}
+		</div>
+	</div>
+
+	{% if notification.type == constant('\\Exposure\\Model\\Notification::TYPE_PROJECT_THEME_SUGGESTION') %}
+		<p>(not implemented)</p>
+	{% elseif notification.type == constant('\\Exposure\\Model\\Notification::TYPE_PROJECT_MODERATION') %}
+		{% if notification.event == constant('\\Exposure\\Model\\ProjectModerationNotification::EVENT_SUBMITTED_PROJECT') %}
+		<p>submitted project</p>
+		{% elseif notification.event == constant('\\Exposure\\Model\\ProjectModerationNotification::EVENT_APPROVED_PROJECT') %}
+		<p>approved project</p>
+		{% elseif notification.event == constant('\\Exposure\\Model\\ProjectModerationNotification::EVENT_FLAGGED_PROJECT') %}
+		<p>flagged project</p>
+		{% elseif notification.event == constant('\\Exposure\\Model\\ProjectModerationNotification::EVENT_REFUSED_PROJECT') %}
+		<p>refused project</p>
+		{% elseif notification.event == constant('\\Exposure\\Model\\ProjectModerationNotification::EVENT_PROJECT_NEEDS_EDITING') %}
+		<p>project needs editing</p>
+		{% endif %}
+	{% elseif notification.type == constant('\\Exposure\\Model\\Notification::TYPE_PROFILE_MODERATION') %}
+		{% if notification.event == constant('\\Exposure\\Model\\ProfileModerationNotification::EVENT_SUBMITTED_PROFILE') %}
+		<p>submitted profile</p>
+		{% elseif notification.event == constant('\\Exposure\\Model\\ProfileModerationNotification::EVENT_APPROVED_PROFILE') %}
+		<p>approved profile</p>
+		{% elseif notification.event == constant('\\Exposure\\Model\\ProfileModerationNotification::EVENT_REFUSED_PROFILE') %}
+		<p>refused profile</p>
+		{% elseif notification.event == constant('\\Exposure\\Model\\ProfileModerationNotification::EVENT_PROFILE_NEEDS_EDITING') %}
+		<p>profile needs editing</p>
+		{% endif %}
+	{% endif %}
+</li>

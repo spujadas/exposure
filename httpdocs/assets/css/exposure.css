@@ -1,0 +1,7 @@
+.notification-unread {
+	font-weight: bold;
+}
+
+.notification-archived {
+	font-style: italic;
+}

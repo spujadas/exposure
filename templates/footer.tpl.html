@@ -1,0 +1,21 @@
+{#
+   This file is part of the Exposure package.
+
+   Copyright 2013 by Sébastien Pujadas
+
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+#}
+
+<div id="footer">
+</div> <!-- footer -->
+
+<script type="text/javascript" src="/assets/js/noty/jquery.noty.js"></script>
+<script type="text/javascript" src="/assets/js/noty/layouts/top.js"></script>
+<script type="text/javascript" src="/assets/js/noty/layouts/center.js"></script>
+<script type="text/javascript" src="/assets/js/noty/themes/default.js"></script>
+
+{% if session.message is defined %}
+<div id="message" style="display: none" data-content="{{session.message.content}}" data-type="{{session.message.type}}"/>
+<script type="text/javascript" src="/assets/js/display-message.js"></script>
+{% endif %}

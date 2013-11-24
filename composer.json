@@ -1,0 +1,25 @@
+{
+    "name": "spujadas/exposure",
+    "type": "library",
+    "description": "Exposure - Your organisation and your projects in the limelight",
+    "keywords": ["project", "sponsor", "sociable"],
+    "homepage": "http://github.com/spujadas/exposure",
+    "license": "MIT",
+    "authors": [
+        { "name": "Sebastien Pujadas", "homepage": "http://www.linkedin.com/in/spujadas" }
+    ],
+    "require": {
+        "php": ">=5.3.2",
+        "doctrine/mongodb-odm": "1.0.*@beta",
+        "monolog/monolog": "1.7.0",
+        "symfony/intl": "v2.3.5",
+        "twig/twig": "v1.14.2",
+        "swiftmailer/swiftmailer": "v5.0.2"
+    },
+    "autoload": {
+        "psr-0": {
+            "Sociable\\": "lib/vendor/sociable/lib",
+            "Exposure\\": "lib"
+        }
+    }
+}

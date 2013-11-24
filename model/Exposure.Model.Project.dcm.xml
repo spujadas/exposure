@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+   This file is part of the Exposure package.
+ 
+   Copyright 2013 by Sébastien Pujadas
+ 
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+-->
+
+<doctrine-mongo-mapping xmlns="http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping"
+                        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                        xsi:schemaLocation="http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping
+                    http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping.xsd">
+
+    <document name="Exposure\Model\Project" collection="projects">
+        <field name="id" id="true" />
+        <field name="urlSlug" type="string" unique="true" />
+        <field name="name" type="string" />
+        <embed-one field="moderationStatus" target-document="Exposure\Model\ModerationStatus" />
+        <field name="languageCode" type="string" />
+        <field name="creationDateTime" type="date" />
+        <reference-one field="theme" target-document="Exposure\Model\Theme"/>
+        <reference-many field="notifications">
+            <discriminator-map>
+                <discriminator-mapping value="projectThemeSuggestion"
+                                       class="Exposure\Model\ProjectThemeSuggestionNotification" />
+                <discriminator-mapping value="projectWant"
+                                       class="Exposure\Model\ProjectWantNotification" />
+                <discriminator-mapping value="projectModeration"
+                                       class="Exposure\Model\ProjectModerationNotification" />
+                <discriminator-mapping value="sponsorContribution"
+                                       class="Exposure\Model\SponsorContributionNotification" />
+                <discriminator-mapping value="sponsorReturn"
+                                       class="Exposure\Model\SponsorReturnNotification" />
+                <discriminator-mapping value="comment"
+                                       class="Exposure\Model\commentNotification" />
+            </discriminator-map>
+        </reference-many>
+        <reference-many field="owners" target-document="Exposure\Model\User" mapped-by="ownedProjects"/>
+        <embed-one field="summary" target-document="Exposure\Model\ApprovableMultiLanguageString"/>
+        <embed-one field="description" target-document="Exposure\Model\ApprovableMultiLanguageString"/>
+        <reference-many field="photos" target-document="Exposure\Model\ApprovableLabelledImage"/>
+        <embed-one field="audienceDescription" target-document="Exposure\Model\ApprovableMultiLanguageString"/>
+        <field name="audienceRange" type="hash"/>
+        <embed-many field="webPresences" target-document="Sociable\Model\WebPresence"/>
+        <reference-one field="place">
+            <discriminator-map>
+                <discriminator-mapping value="location" class="Sociable\Model\Location" />
+                <discriminator-mapping value="country" class="Sociable\Model\Country" />
+            </discriminator-map>
+        </reference-one>
+        <reference-one field="financialNeed" target-document="Exposure\Model\FinancialNeed" mapped-by="project"/>
+        <reference-many field="nonFinancialNeeds" target-document="Exposure\Model\NonFinancialNeed" mapped-by="project"/>
+        <field name="sponsoringDeadline" type="date" />
+        <field name="eventDateTime" type="date" />
+        <reference-many field="wants" target-document="Exposure\Model\ProjectWant" mapped-by="project"/>
+        <reference-many field="comments" target-document="Exposure\Model\CommentOnProject" mapped-by="project"/>
+        <field name="pageviews" type="int" />
+    </document>        
+</doctrine-mongo-mapping>

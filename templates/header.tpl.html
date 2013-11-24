@@ -1,0 +1,29 @@
+{#
+   This file is part of the Exposure package.
+
+   Copyright 2013 by Sébastien Pujadas
+
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+#}
+
+<div class="navbar navbar-default">
+	<div class="navbar-header">
+    	<a class="navbar-brand" href="/"><img src="/assets/images/logo.png" height="90" alt="logo {{appName}}"/></a>
+  	</div>
+
+	<ul class="nav navbar-nav navbar-right">
+
+	{% if session.user is defined %}
+		<li><a href="#" data-op="sign-out" data-form-id="sign-out">Sign out</a></li>
+        <form id="sign-out" method="post" action="/">
+            <input type="hidden" name="token" value="{{ session.token }}" />
+            <input type="hidden" name="action" value="user_signout" />
+        </form>
+		<script type="text/javascript" src="/assets/js/access.js"></script>
+	{% else %}
+		<li><a href="/sign-up">Sign up</a></li>
+		<li><a href="/sign-in">Sign in</a></li>
+	{% endif %}
+	</ul>
+</div> <!-- navbar -->

@@ -1,0 +1,3 @@
+[submodule "lib/vendor/sociable"]
+	path = lib/vendor/sociable
+	url = https://github.com/spujadas/sociable.git

@@ -1,0 +1,174 @@
+{#
+   This file is part of the Exposure package.
+
+   Copyright 2013 by Sébastien Pujadas
+
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+#}
+
+{% extends "page-left-nav.tpl.html" %}
+
+{% block content %}
+
+<h1>{{project.name}}{% if userIsOwner %}
+	{% if project.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_FIRST_USER_EDIT') %}
+	<span class="label label-warning">Unpublished</span>
+	{% elseif project.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_USER_EDIT') %}
+	<span class="label label-warning">Changed since last publication</span>
+	{% elseif project.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_APPROVED') %}
+	<span class="label label-success">Published</span>
+	{% elseif (project.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_SUBMITTED'))
+		or (project.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_SUBMITTED_FIRST_TIME')) %}
+	<span class="label label-info">Pending moderation</span>
+	{% elseif project.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_FLAGGED') %}
+	<span class="label label-warning">Flagged as inappropriate</span>
+	{% elseif project.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_REJECTED') %}
+	<span class="label label-danger">Rejected</span>
+	{% endif %}
+{% endif %}</h1>
+
+<p>Number of views: {{project.pageviews}}</p>
+
+{% if userIsOwner %}
+<p><a href="/project-edit/{{project.urlSlug}}">Edit this project</a></p>
+<p><a href="/needs/{{project.urlSlug}}">Manage this project's needs</a></p>
+{% endif %}
+
+{% if userIsOwner %}
+	{% for want in project.wants %}
+		<div class="alert alert-info">{% if user.canSeeSponsorOrganisation(want.sponsorOrganisation) %}{{want.sponsorOrganisation.name}}{% else %}A sponsor from the "{{want.sponsorOrganisation.businessSector.name.stringByLanguageCode(session.language)}}" business sector{% endif %} is interested by this project.</div>
+	{% endfor %}
+{% else %}
+	{% set numberWantingSponsors = project.wants|length %}
+	{% if numberWantingSponsors > 0 %}
+	<p>{{ numberWantingSponsors }} sponsor{% if numberWantingSponsors != 1 %}s{% endif %} interested.</p>
+	{% endif %}
+{% endif %}
+
+<h4>Creation date</h4>
+<p>{{project.creationDateTime|date('d/m/Y')}}</p>
+
+<h4>Theme</h4>
+<p>{{ themetree|join(' > ') }}</p>
+
+<h4>Summary</h4>
+{% include 'approvable-language-string.inc.tpl.html' with { 'string' : project.summary } %}
+
+<h4>Audience</h4>
+{% include 'approvable-language-string.inc.tpl.html' with { 'string' : project.audienceDescription } %}
+<p>Between {{project.audienceRange['min']}} and {{project.audienceRange['max']}} people.</p>
+
+{% if userIsOwner %}
+	{% if project.description.current is not null %}
+		<h4>Description</h4>
+		{%if not(displaydescription)%}
+			<div class="alert alert-warning">The description will only be publicly visible after your subscribe.</div>{%endif%}
+		{% include 'approvable-language-string.inc.tpl.html' with { 'string' : project.description } %}
+	{% endif %}
+{% elseif displaydescription and (project.description.latestApproved is not null) %}
+	<h4>Description</h4>
+	{{ project.description.latestApproved.stringByLanguageCode(session.language) }}
+{% endif %}
+
+{% if project.sponsoringDeadline is not null %}
+<h4>Sponsoring deadline</h4>
+<p>{{project.sponsoringDeadline|date('d/m/Y')}}</p>
+{% endif %}
+
+{% if project.eventDateTime is not null %}
+<h4>Event date</h4>
+<p>{{project.eventDateTime|date('d/m/Y')}}</p>
+{% endif %}
+
+<h4>Location</h4>
+<p>{{ locationtree|join(' > ') }}</p>
+
+<h4>Photos</h4>
+{% if userIsOwner %}
+	{% if not(subscribed) %}
+	  <div class="alert alert-warning">Only the first photo will be publicly visible unless you subscribe.</div>
+	{% else %}
+	  {% if numberdisplayedphotos < maxnumberdisplayedphotos %}
+	  	<div class="alert alert-warning">With you current subscription,
+            {% if numberdisplayedphotos == 1 %}
+              only the first photo
+            {%else%}
+              only the first {{numberdisplayedphotos}} photos
+            {%endif%}
+            are publicly visible.</div>
+	  {%endif%}
+	{% endif %}
+	<div class="row">
+		{% for photo in project.photos %}
+		<div class="col-md-3">
+			<div class="panel panel-default">
+				<div class="panel-body">
+					{%if loop.index > numberdisplayedphotos%}<span class="glyphicon glyphicon-eye-close"></span>{% endif %}
+					<img src="/project-photo/{{project.urlSlug}}/{{photo.id}}/current" 
+						class="img-rounded" style="width: 100%" 
+						alt="{{photo.current.description.stringByLanguageCode(session.language)}}"/>
+				</div>
+				{% set description = photo.current.description.stringByLanguageCode(session.language) %}
+				{% if description is not empty %}
+				<div class="panel-footer">
+				    <p>{{description}}</p>
+				</div>
+				{% endif %}
+			</div>
+		</div>
+		{%endfor%}
+	</div>
+{% else %}
+	<div class="row">
+		{% for photo in project.photos %}
+			{% if loop.index0 < numberdisplayedphotos %}
+				<div class="col-md-3">
+					<div class="panel panel-default">
+						<div class="panel-body">
+							<img src="/project-photo/{{project.urlSlug}}/{{photo.id}}" 
+							class="img-rounded" style="width: 100%"
+							alt="{{photo.latestApproved.description.stringByLanguageCode(session.language)}}"/>
+						</div>
+						{% set description = photo.latestApproved.description.stringByLanguageCode(session.language) %}
+						{% if description is not empty %}
+						<div class="panel-footer">
+						    <p>{{description}}</p>
+						</div>
+						{% endif %}
+					</div>
+			  	</div>
+		  	{% endif %}
+		{%endfor%}
+	</div>
+{% endif %}
+
+{% if project.webPresences|length %}
+	{% if userIsOwner or displaywebpresence%}
+<h4>Web</h4>
+	{% if userIsOwner and not(subscribed) %}<div class="alert alert-warning">The links below will only be publicly visible after your subscribe.</div>{% endif %}
+	<ul>
+	{% for webpresence in project.webPresences %}
+	  <li><a href="{{webpresence.url.url}}">{{webpresence.url.url}}</a>{% if webpresence.url.description.stringByLanguageCode(session.language) is not empty %} – {{webpresence.url.description.stringByLanguageCode(session.language)}}{% endif %}</li>
+	{% endfor %}
+	</ul>
+	{% endif %}
+{% endif %}
+
+{% if userIsOwner %}
+	{% if (project.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_USER_EDIT'))
+		or (project.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_FIRST_USER_EDIT')) %}
+	<form role="form" class="form-horizontal" method="post" action="/">
+	<button type="submit" class="btn btn-primary">Publish</button>
+	<input type="hidden" name="project_id" value="{{ project.id }}" />
+	<input type="hidden" name="token" value="{{ session.token }}" />
+	<input type="hidden" name="action" value="project_publish" />
+	</form>
+	{% endif %}
+{% endif %}
+
+{% if not userIsOwner %}
+	{% include 'project-view-needs.inc.tpl.html' %}
+{% endif %}
+
+{% endblock %}

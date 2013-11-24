@@ -1,0 +1,31 @@
+{#
+   This file is part of the Exposure package.
+
+   Copyright 2013 by Sébastien Pujadas
+
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+#}
+
+{% extends 'notification-email.tpl.html' %}
+
+{% block subject %}{{parent()}}Compensation completed by the {{project.name}} project team{% endblock %}
+
+{% block body_html %}
+{% from 'view_macros.tpl.html' import currency_value %}
+<p>The {{project.name}} project team has completed "{{return.description.stringByLanguageCode(language)}}" for {{need.contribution.contributor.name}}, carried out in exchange for a contribution
+	{% if need.type == constant('\\Exposure\\Model\\ProjectNeed::TYPE_FINANCIAL') %}
+		of {{currency_value(need.amount, currency)}} to "{{need.description.stringByLanguageCode(language)}}"
+	{% else %}
+		to "{{need.description.stringByLanguageCode(language)}}"
+	{% endif %}.</p>
+
+{{ parent() }}
+{% endblock %}
+
+{% block body_text %}
+{% from 'view_macros.tpl.html' import currency_value %}
+The {{project.name}} project team has completed "{{return.description.stringByLanguageCode(language)}}" for {{need.contribution.contributor.name}}, carried out in exchange for a contribution {% if need.type == constant('\\Exposure\\Model\\ProjectNeed::TYPE_FINANCIAL') %} of {{currency_value(need.amount, currency)}} to "{{need.description.stringByLanguageCode(language)}}"{% else %}to "{{need.description.stringByLanguageCode(language)}}"{% endif %}.
+
+{{ parent() }}
+{% endblock %}

@@ -1,0 +1,27 @@
+{#
+   This file is part of the Exposure package.
+
+   Copyright 2013 by Sébastien Pujadas
+
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+#}
+
+{% extends "page-left-nav.tpl.html" %}
+
+{% block content %}
+<h1>Subscription history</h1>
+{% if user.pastSubscriptions.count == 0 %}
+	<p>No past subscriptions.</p>
+{% else %}
+	<ul id="notifications" class="list-group">
+		{% for pastSubscription in user.pastSubscriptions %}
+		<li class="notification list-group-item">
+		<p>Name: {{pastSubscription.typeAndDuration.type.name.stringByLanguageCode(session.language)}}
+		<p>Start: {{pastSubscription.startDateTime|date('d/m/Y')}}</p>
+		<p>End: {{pastSubscription.endDateTime|date('d/m/Y')}}</p>
+		</li>
+		{% endfor %}
+	</ul>
+{% endif %}
+{% endblock %}

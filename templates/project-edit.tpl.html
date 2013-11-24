@@ -1,0 +1,313 @@
+{#
+   This file is part of the Exposure package.
+
+   Copyright 2013 by Sébastien Pujadas
+
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+#}
+
+{% from 'form_macros.tpl.html' import error, autofill_or_value, error_class %}
+
+{% extends "page-left-nav.tpl.html" %}
+
+{% block content %}
+<h1>Project</h1>
+
+{% if project.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_APPROVED') %}
+<div class="alert alert-warning">If you change this project, you will have to resubmit it to be approved.</div>
+{% endif %}
+
+<form role="form" class="form-horizontal" method="post" action="/">
+
+<div class="form-group{{ error_class(session.errors, 'name') }}">
+  <label class="col-lg-2 control-label" for="name">Name</label>
+  <div class="col-lg-10">
+    <input type="text" class="form-control" id="name" name="name" placeholder="name" 
+           maxlength="254" value="{{ autofill_or_value (session.autofill, 'name', project.name) }}" />
+    {{ error(session.errors, 'name') }}
+  </div>
+</div>
+
+<div id="theme">
+{% include 'theme.inc.tpl.html' %}
+</div>
+
+<div class="form-group{{ error_class(session.errors, 'summary') }}">
+  <label class="col-lg-2 control-label" for="summary">Summary</label>
+  <div class="col-lg-10">
+    <textarea class="form-control" name="summary" id="summary" 
+      maxlength="{{constant('\\Exposure\\Model\\Project::SUMMARY_MAX_LENGTH')}}">{{ 
+      autofill_or_value(session.autofill, 'summary', project.summary.current.stringByLanguageCode(session.language)) 
+    }}</textarea>
+    {{ error(session.errors, 'summary') }}
+  </div>
+</div>
+
+<div class="form-group{{ error_class(session.errors, 'audience_description') }}">
+  <label class="col-lg-2 control-label" for="audience_description">Target audience</label>
+  <div class="col-lg-10">
+    <textarea class="form-control" name="audience_description" id="audience_description" 
+      maxlength="{{constant('\\Exposure\\Model\\Project::AUDIENCE_DESCRIPTION_MAX_LENGTH')}}">{{ 
+      autofill_or_value(session.autofill, 'audience_description', project.audienceDescription.current.stringByLanguageCode(session.language)) 
+    }}</textarea>
+  </div>
+</div>
+{{ error(session.errors, 'audience_description') }}
+
+<div class="form-group{{ error_class(session.errors, 'audience_range') }}">
+  <label class="col-lg-2 control-label">Audience range</label>
+  <div class="col-lg-10">
+    <p class="form-control-static">Between</p>
+    <input class="form-control" name="audience_range_min" type="number" 
+      min="0" max="{{constant('\\Exposure\\Model\\Project::AUDIENCE_RANGE_MAX')}}" 
+      value="{{ autofill_or_value(session.autofill, 'audience_range_min', project.audienceRange['min']) }}"/>
+    <p class="form-control-static"> and </p>
+    <input class="form-control" name="audience_range_max" type="number" 
+      min="0" max="{{constant('\\Exposure\\Model\\Project::AUDIENCE_RANGE_MAX')}}" 
+      value="{{ autofill_or_value(session.autofill, 'audience_range_max', project.audienceRange['max']) }}"/>
+    <p class="form-control-static"> people</p>
+    {{ error(session.errors, 'audience_range') }}
+  </div>
+</div>
+
+<div class="form-group{{ error_class(session.errors, 'description') }}">
+  <label class="col-lg-2 control-label" for="description">Description</label>
+  <div class="col-lg-10">
+    {%if not(displaydescription)%}
+      <div class="alert alert-warning">The description will only be publicly visible after your subscribe.</div>
+    {%endif%}
+    <textarea class="form-control" name="description" id="description" 
+      maxlength="{{constant('\\Exposure\\Model\\Project::DESCRIPTION_MAX_LENGTH')}}">{{ 
+      autofill_or_value(session.autofill, 'description', project.description.current.stringByLanguageCode(session.language)) 
+    }}</textarea>
+    {{ error(session.errors, 'description') }}
+  </div>
+</div>
+
+<div class="form-group{{ error_class(session.errors, 'sponsoring_deadline') }}">
+  <label class="col-lg-2 control-label" for="sponsoring_deadline">Sponsoring deadline</label>
+  <div class="col-lg-10">
+    <p class="form-control-static">Optional - Format is dd/mm/yyyy</p>
+    <input type="text" class="form-control" name="sponsoring_deadline" 
+      value="{{ autofill_or_value(session.autofill, 'sponsoring_deadline', project.sponsoringDeadline is null ? '' : project.sponsoringDeadline|date('d/m/Y')) }}"
+    /> 
+    <p class="form-control-static"><a href="#" id="no_sponsoring_deadline">No deadline</a></p>
+    {{ error(session.errors, 'sponsoring_deadline') }}
+  </div>
+</div>
+
+<div class="form-group{{ error_class(session.errors, 'event_date') }}">
+  <label class="col-lg-2 control-label" for="event_date">Event date</label>
+  <div class="col-lg-10">
+    <p class="form-control-static">Optional - Format is dd/mm/yyyy</p>
+    <input type="text" class="form-control" name="event_date" 
+      value="{{ autofill_or_value(session.autofill, 'event_date', project.eventDateTime is null ? '' : project.eventDateTime|date('d/m/Y')) }}"
+    />
+    <p class="form-control-static"><a href="#" id="no_sponsoring_deadline">No event date</a></p>
+    {{ error(session.errors, 'event_date') }}
+  </div>
+</div>
+
+{% include 'country.inc.tpl.html' %}
+
+
+<div id="location">
+  {% include 'location.inc.tpl.html' %}
+</div>
+
+<fieldset>
+  <legend>Photos</legend>
+  <div class="form-group{{ error_class(session.errors, 'photo') }}">
+    <div class="col-lg-10">
+      <p class="control-label-static">Photo size must not exceed 2 Mo</p>
+    </div>
+    <div class="col-lg-10">
+      {% if not(subscribed) %}
+        <div class="alert alert-warning">Only the first photo will be publicly visible unless you subscribe.</div>
+      {% else %}
+        {% if numberdisplayedphotos < maxnumberdisplayedphotos %}
+          <div class="alert alert-warning">With you current subscription,
+            {% if numberdisplayedphotos == 1 %}
+              only the first photo
+            {%else%}
+              only the first {{numberdisplayedphotos}} photos
+            {%endif%}
+            will be publicly visible.
+          </div>
+        {%endif%}
+      {% endif %}
+      {% if session.errors['photos']['general'] is defined %}<strong>{{session.errors['photos']['general']}}</strong>{% endif %}
+      <div id="photo_uploads">
+        {% if project %}
+          {% if session.autofill['photos'] is defined %}
+            {% for photo in session.autofill['photos'] %}
+              <div class="file_upload form-group">
+                <div class="col-lg-3">
+                  <img src="/project-photo/{{project.urlSlug}}/{{photo.id}}/current" class="photo-thumbnail" width="120" alt="{{photo.description}}"/>
+                  <input type="hidden" name="photo_ids[]" value="{{photo.id}}"/>
+                  <input type="hidden" name="MAX_FILE_SIZE" value="2097152"/>
+                  <input name="photo_files[]" type="file"/>
+                </div>
+                <label class="col-lg-2 control-label">Description</label>
+                <div class="col-lg-6">
+                  <input class="form-control" name="photo_descriptions[]" value="{{photo.description}}"/>
+                </div>
+                {% if session.errors['photos'][loop.index0]['description'] is defined %}<strong>{{session.errors['photos'][loop.index0]['description']}}</strong>{% endif %}
+              </div>
+            {%endfor%}
+          {% else %}
+            {% for photo in project.photos %}
+              <div class="file_upload form-group">
+                <div class="col-lg-3">
+                  <img src="/project-photo/{{project.urlSlug}}/{{photo.id}}/current" class="photo-thumbnail" width="120" alt="{{photo.current.description.stringByLanguageCode(session.language)}}"/>
+                  <input type="hidden" name="photo_ids[]" value="{{photo.id}}"/>
+                  <input type="hidden" name="MAX_FILE_SIZE" value="2097152"/>
+                  <input name="photo_files[]" type="file"/>
+                </div>
+                <label class="col-lg-2 control-label">Description</label>
+                <div class="col-lg-6">
+                  <input class="form-control" name="photo_descriptions[]" value="{{photo.current.description.stringByLanguageCode(session.language)}}"/>
+                </div>
+              </div>
+            {%endfor%}
+          {% endif %}
+        {% else %}
+          {% if session.autofill['photos'] is defined %}
+            {% for photo in session.autofill['photos'] %}
+              <div class="file_upload form-group">
+                <div class="col-lg-3">
+                  <img src="/project-photo/{{photo.id}}" class="photo-thumbnail" width="120"/>
+                  <input type="hidden" name="photo_ids[]" value="{{photo.id}}"/>
+                  <input type="hidden" name="MAX_FILE_SIZE" value="2097152"/>
+                  <input name="photo_files[]" type="file"/>
+                </div>
+                <label class="col-lg-2 control-label">Description</label>
+                <div class="col-lg-6">
+                  <input class="form-control" name="photo_descriptions[]" value="{{photo.description}}"/>
+                </div>
+                {% if session.errors['photos'][loop.index0]['description'] is defined %}<strong>{{session.errors['photos'][loop.index0]['description']}}</strong>{% endif %}
+              </div>
+            {% endfor %}
+          {% else %}
+            {% for photo in user.tempDraftProjectPhotos %}
+              <div class="file_upload form-group">
+                <div class="col-lg-3">
+                  <img src="/project-photo/{{photo.id}}" class="photo-thumbnail" width="120" alt="{{photo.current.description.stringByLanguageCode(session.language)}}"/>
+                  <input type="hidden" name="photo_ids[]" value="{{photo.id}}"/>
+                  <input type="hidden" name="MAX_FILE_SIZE" value="2097152"/>
+                  <input name="photo_files[]" type="file"/>
+                </div>
+                <label class="col-lg-2 control-label">Description</label>
+                <div class="col-lg-6">
+                  <input class="form-control" name="photo_descriptions[]" value="{{photo.description.stringByLanguageCode(session.language)}}"/>
+                </div>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endif %}
+      </div>
+      {% include 'dynamic-project-photo-fields.tpl.html' with { 
+        'numDivs' : (session.autofill['photos'] is defined)?(session.autofill['photos']|length):(project is null?0:project.photos.count),
+        'maxNumDivs' : maxnumberdisplayedphotos,
+        'rootDivId' : 'photo_uploads',
+        'baseDiv' : 
+            '<div class="file_upload form-group">'
+            ~ '<div class="col-lg-3">'
+              ~ '<input type="hidden" name="photo_ids[]" value=""/>'
+              ~ '<input type="hidden" name="MAX_FILE_SIZE" value="2097152"/>'
+              ~ '<input name="photo_files[]" type="file"/>'
+            ~ '</div>'
+            ~ '<label class="col-lg-2 control-label">Description</label>'
+            ~ '<div class="col-lg-6">'
+              ~ '<input class="form-control" name="photo_descriptions[]"/>'
+            ~ '</div>'
+          ~ '</div>',
+        'activeFieldSelector' : 'input[type="file"]',
+        'activeIdValue' : 'active',
+        'deleteItem' : '<button type="button" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span></button>',
+      } %}
+      {{ error(session.errors, 'photo') }}
+    </div>
+  </div>
+</fieldset>
+
+<fieldset>
+  <legend>Web</legend>
+  {%if not(displaywebpresence)%}
+    <div class="alert alert-warning">The links below will only be publicly visible after your subscribe.</div>
+  {%endif%}
+  <div id="web_presences">
+    {% if session.autofill['web_presences'] is defined %}
+      {% for webpresence in session.autofill['web_presences'] %}
+        <div class="form-group{% if (session.errors['web_presences'][loop.index0]['url'] is defined)
+          or (session.errors['web_presences'][loop.index0]['description']) %} has-error{% endif %}">
+          <label class="col-lg-1 control-label">URL</label>
+          <div class="col-lg-4">
+            <input type="text"
+              class="form-control" 
+              name="web_presence_urls[]" 
+              value="{{webpresence.url}}"/>
+            {% if session.errors['web_presences'][loop.index0]['url'] is defined %}<strong>{{session.errors['web_presences'][loop.index0]['url']}}</strong>{% endif %}
+          </div>
+          <label class="col-lg-2 control-label">Description</label>
+          <div class="col-lg-4">
+            <input type="text"
+              class="form-control" 
+              name="web_presence_descriptions[]" 
+              value="{{webpresence.description}}"/>
+            {% if session.errors['web_presences'][loop.index0]['description'] is defined %}<strong>{{session.errors['web_presences'][loop.index0]['description']}}</strong>{% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    {% elseif project %}
+      {% for webpresence in project.webPresences %}
+        <div class="form-group">
+          <label class="col-lg-1 control-label">URL</label>
+          <div class="col-lg-4">
+            <input type="text"
+              class="form-control" 
+              name="web_presence_urls[]" 
+              value="{{webpresence.url.url}}"/>
+          </div>
+          <label class="col-lg-2 control-label">Description</label>
+          <div class="col-lg-4">
+            <input type="text" 
+              class="form-control" 
+              name="web_presence_descriptions[]" 
+              value="{{webpresence.url.description.stringByLanguageCode(session.language)}}"/>
+          </div>
+        </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+{% include 'dynamic-fields.tpl.html' with {
+  'numDivs' : (session.autofill['web_presences'] is defined)?(session.autofill['web_presences']|length):(project is null?0:project.webPresences.count),
+  'maxNumDivs' : maxnumberwebpresences,
+  'rootDivId' : 'web_presences',
+  'baseDiv' : '<div class="form-group"> '
+        ~ '<label class="col-lg-1 control-label">URL</label>'
+        ~ '<div class="col-lg-4"><input type="text" class="form-control" name="web_presence_urls[]"/></div> '
+        ~ '<label class="col-lg-2 control-label">Description</label>'
+        ~ '<div class="col-lg-4"><input type="text" class="form-control" name="web_presence_descriptions[]"/></div> '
+        ~ '</div>',
+  'activeFieldSelector' : 'input[name="web_presence_urls[]"]',
+  'activeIdValue' : 'active',
+  'deleteItem' : '<button type="button" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span></button>',
+} %}
+</fieldset>
+
+<button type="submit" class="btn btn-primary">Save</button>
+{% if project.id is not null %}
+<input type="hidden" name="project_id" value="{{ project.id }}" />
+{% endif %}
+<input type="hidden" name="token" value="{{ session.token }}" />
+<input type="hidden" name="action" value="project_save" />
+</form>
+
+<p><a href="/project/{{project.urlSlug}}">Cancel</a></p>
+
+<script type="text/javascript" src="/assets/js/jquery-ui.min.js"></script>
+<script type="text/javascript" src="/assets/js/jquery.ui.datepicker-fr.js"></script>
+<script type="text/javascript" src="/assets/js/project-edit.js"></script>
+{% endblock %}

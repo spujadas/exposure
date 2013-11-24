@@ -1,0 +1,91 @@
+{#
+   This file is part of the Exposure package.
+
+   Copyright 2013 by Sébastien Pujadas
+
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+#}
+
+{% from 'form_macros.tpl.html' import error, error_class, autofill_or_value %}
+
+{% extends "page.tpl.html" %}
+
+{% block content %}
+<h1>Billing address</h1>
+<form role="form" class="form-horizontal" method="post" action="/">
+	<div class="form-group">
+		<label class="col-lg-2 control-label">Name</label>
+		<div class="col-lg-10">
+			<p class="form-control-static">{{user.name}} {{user.surname}}</p>
+		</div>
+	</div>
+	<div class="form-group{{ error_class(session.errors, 'address1') }}">
+		<label class="col-lg-2 control-label" for="address1">Address</label>
+		<div class="col-lg-10">
+			<input type="text" class="form-control" id="address1" name="address1"
+				maxlength="{{constant('\\Sociable\\Model\\Address::ADDRESS1_MAX_LENGTH')}}" value="{{ autofill_or_value(session.autofill, 'address1', user.billingAddress.address1) }}" />
+		{{ error(session.errors, 'address1') }}
+		</div>
+	</div>
+	<div class="form-group{{ error_class(session.errors, 'address2') }}">
+		<label class="col-lg-2 control-label" for="address2">Address (cont'd)</label>
+		<div class="col-lg-10">
+			<input type="text" class="form-control" id="address2" name="address2"
+				maxlength="{{constant('\\Sociable\\Model\\Address::ADDRESS2_MAX_LENGTH')}}" value="{{ autofill_or_value(session.autofill, 'address2', user.billingAddress.address2) }}" />
+		{{ error(session.errors, 'address2') }}
+		</div>
+	</div>
+	<div class="form-group{{ error_class(session.errors, 'city_area_or_district') }}">
+		<label class="col-lg-2 control-label" for="city_area_or_district">City area or district</label>
+		<div class="col-lg-10">
+			<input type="text" class="form-control" id="city_area_or_district" name="city_area_or_district"
+				maxlength="{{constant('\\Sociable\\Model\\Address::CITYAREAORDISTRICT_MAX_LENGTH')}}" value="{{ autofill_or_value(session.autofill, 'city_area_or_district', user.billingAddress.cityAreaOrDistrict) }}" />
+		{{ error(session.errors, 'city_area_or_district') }}
+		</div>
+	</div>
+	<div class="form-group{{ error_class(session.errors, 'post_code') }}">
+		<label class="col-lg-2 control-label" for="post_code">Post code</label>
+		<div class="col-lg-10">
+			<input type="text" class="form-control" id="post_code" name="post_code"
+				maxlength="{{constant('\\Sociable\\Model\\Address::POSTCODE_MAX_LENGTH')}}" value="{{ autofill_or_value(session.autofill, 'post_code', user.billingAddress.postCode) }}" />
+		{{ error(session.errors, 'post_code') }}
+		</div>
+	</div>
+	<div class="form-group{{ error_class(session.errors, 'city') }}">
+		<label class="col-lg-2 control-label" for="city">City, town or village</label>
+		<div class="col-lg-10">
+			<input type="text" class="form-control" id="city" name="city"
+				maxlength="{{constant('\\Sociable\\Model\\Address::CITYORTOWNORVILLAGE_MAX_LENGTH')}}" value="{{ autofill_or_value(session.autofill, 'city', user.billingAddress.cityOrTownOrVillage) }}" />
+		{{ error(session.errors, 'city') }}
+		</div>
+	</div>
+	<div class="form-group{{ error_class(session.errors, 'county') }}">
+		<label class="col-lg-2 control-label" for="county">County</label>
+		<div class="col-lg-10">
+			<input type="text" class="form-control" id="county" name="county"
+				maxlength="{{constant('\\Sociable\\Model\\Address::COUNTY_MAX_LENGTH')}}" value="{{ autofill_or_value(session.autofill, 'county', user.billingAddress.county) }}" />
+		{{ error(session.errors, 'county') }}
+		</div>
+	</div>
+	<div class="form-group{{ error_class(session.errors, 'country') }}">
+		<label class="col-lg-2 control-label" for="country">Country</label>
+		<div class="col-lg-10">
+  			<select name="country" class="form-control" id="country">
+		      	<option value=""></option>
+		      	{% for c in countries %}
+			    	<option value="{{ c.code }}"{% if (country is defined) and (country == c.code) %} selected="selected"{% endif %}>{{c.name.stringByLanguageCode(session.language)}}</option>
+		      	{% endfor %}
+  			</select>
+  		{{ error(session.errors, 'country') }}
+  		</div>
+  	</div>
+
+	<button type="submit" class="btn btn-primary">Save</button>
+	<input type="hidden" name="subscription_id" value="{{ subscription.id }}" />
+	<input type="hidden" name="token" value="{{ session.token }}" />
+	<input type="hidden" name="action" value="billing_address_save" />
+</form>
+<p><a href="/subscription-order/{{subscription.id}}">Cancel</a></p>
+
+{% endblock %}

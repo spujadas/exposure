@@ -1,0 +1,235 @@
+{#
+   This file is part of the Exposure package.
+
+   Copyright 2013 by Sébastien Pujadas
+
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+#}
+
+{% from 'form_macros.tpl.html' import error, autofill, autofill_or_value, value_if_autofill_or_boolean, error_class %}
+
+{% extends "page-left-nav.tpl.html" %}
+
+{% block content %}
+<h1>{{organisation.name}}</h1>
+<form role="form" class="form-horizontal" method="post" action="/">
+<fieldset>
+  <legend>General information</legend>
+
+  <div class="form-group{{ error_class(session.errors, 'name') }}">
+    <label class="col-lg-2 control-label" for="name">Name</label>
+    <div class="col-lg-10">
+      <input type="text" class="form-control" id="name" name="name" placeholder="name of the organisation" 
+             maxlength="254" value="{{ autofill_or_value (session.autofill, 'name', organisation.name) }}" />
+      {{ error(session.errors, 'name') }}
+    </div>
+  </div>
+
+  <div class="form-group{{ error_class(session.errors, 'type') }}">
+    <label class="col-lg-2 control-label" for="type">Type</label>
+    {% set type = autofill_or_value(session.autofill, 'type', organisation.type) %}
+    <div class="col-lg-10">
+      <select name="type" class="form-control" autocomplete="off" id="type">
+        <option value="">-- select an organisation type</option>
+        {% set typeTree = [
+          {'label': constant('\\Exposure\\Model\\SponsorOrganisation::BUSINESS_ORGANISATION'), 'name': 'business organisation'},
+          {'label': constant('\\Exposure\\Model\\SponsorOrganisation::NPO_ORGANISATION'), 'name': 'non-profit organisation'}
+          ]
+        %}
+        {% for typeItem in typeTree %}
+          <option value="{{ typeItem.label }}"{% if type == typeItem.label %} selected="selected"{% endif %}>{{typeItem.name}}</option>
+        {% endfor %}
+      </select>
+      {{ error(session.errors, 'type') }}
+    </div>
+  </div>
+
+  <div class="form-group{{ error_class(session.errors, 'business_sector') }}">
+    <label class="col-lg-2 control-label" for="business_sector">Business sector</label>
+    {% set businessSectorCode = autofill_or_value(session.autofill, 'business_sector', organisation.businessSector.code) %}
+    <div class="col-lg-10">
+      <select name="business_sector" class="form-control" autocomplete="off" id="business_sector">
+        <option value="">-- select a business sector</option>
+        {% for businessSector in businessSectors %}
+          <option value="{{ businessSector.code }}"{% if businessSectorCode == businessSector.code %} selected="selected"{% endif %}>{{businessSector.name.stringByLanguageCode(session.language)}}</option>
+        {% endfor %}
+      </select> {{ error(session.errors, 'business_sector') }}
+    </div>
+  </div>
+
+  <div class="form-group{{ error_class(session.errors, 'description') }}">
+    <label class="col-lg-2 control-label" for="description">Description</label>
+    <div class="col-lg-10">
+      <textarea class="form-control" name="description" id="description" 
+        maxlength="{{constant('\\Exposure\\Model\\SponsorOrganisation::DESCRIPTION_MAX_LENGTH')}}"
+        placeholder="description of your organisation">{{ autofill_or_value(session.autofill, 'description', organisation.description.stringByLanguageCode(session.language)) }}</textarea>
+      {{ error(session.errors, 'description') }}
+    </div>
+  </div>
+
+  <div class="form-group{{ error_class(session.errors, 'logo') }}">
+    <label class="col-lg-2 control-label" for="description">Logo (2 Mo max.)</label>
+    <div class="col-lg-10">
+      {% if organisation.logo %}
+      <img src="/organisation-logo/{{organisation.urlSlug}}" width="120" alt="{{organisation.name}}"/>
+      {% endif %}
+      <input type="hidden" name="MAX_FILE_SIZE" value="2097152"/>
+      <input type="file" name="logo"/>
+      {{ error(session.errors, 'logo') }}
+    </div>
+  </div>
+</fieldset>
+
+<fieldset class="{{ error_class(session.errors, 'contact_details') }}">
+  <legend>Contact</legend>
+  <p>Fill in at least one field.</p>
+  <div class="form-group{{ error_class(session.errors, 'email') }}">
+    <label class="col-lg-2 control-label" for="email">Email address</label>
+    <div class="col-lg-10">
+      <input type="email" 
+        class="form-control" 
+        name="email" id="email"
+        value="{{ autofill_or_value(session.autofill, 'email', organisation.contactDetails.email) }}"/>
+      {{ error(session.errors, 'email') }}
+    </div>
+  </div>
+
+  <div class="form-group{{ error_class(session.errors, 'phone_number') }}">
+    <label class="col-lg-2 control-label" for="phone_number">Phone number</label>
+    <div class="col-lg-10">
+      <input type="text"
+        class="form-control" 
+        name="phone_number" id="phone_number"
+        value="{{ autofill_or_value(session.autofill, 'phone_number', organisation.contactDetails.phoneNumber) }}"/>
+      {{ error(session.errors, 'phone_number') }}
+    </div>
+  </div>
+
+  <div class="form-group{{ error_class(session.errors, 'mobile_number') }}">
+    <label class="col-lg-2 control-label" for="mobile_number">Mobile number</label>
+    <div class="col-lg-10">
+      <input type="text"
+        class="form-control" 
+        name="mobile_number" id="mobile_number"
+        value="{{ autofill_or_value(session.autofill, 'mobile_number', organisation.contactDetails.mobileNumber) }}"/>
+      {{ error(session.errors, 'mobile_number') }}
+    </div>
+  </div>
+
+  <div class="form-group{{ error_class(session.errors, 'fax_number') }}">
+    <label class="col-lg-2 control-label" for="fax_number">Fax number</label>
+    <div class="col-lg-10">
+      <input type="text"
+        class="form-control" 
+        name="fax_number" id="fax_number"
+        value="{{ autofill_or_value(session.autofill, 'fax_number', organisation.contactDetails.faxNumber) }}"/>
+      {{ error(session.errors, 'fax_number') }}
+    </div>
+  </div>
+
+  <div class="form-group{{ error_class(session.errors, 'skype_name') }}">
+    <label class="col-lg-2 control-label" for="skype_name">Skype</label>
+    <div class="col-lg-10">
+      <input type="text"
+        class="form-control" 
+        name="skype_name" id="skype_name"
+        value="{{ autofill_or_value(session.autofill, 'skype_name', organisation.contactDetails.skypeName) }}"/>
+      {{ error(session.errors, 'skype_name') }}
+    </div>
+  </div>
+</fieldset>
+
+<fieldset>
+  <legend>Web</legend>
+  <div id="web_presences">
+    {% if session.autofill['web_presences'] is defined %}
+      {% for webpresence in session.autofill['web_presences'] %}
+        <div class="form-group{% if (session.errors['web_presences'][loop.index0]['url'] is defined)
+          or (session.errors['web_presences'][loop.index0]['description']) %} has-error{% endif %}">
+          <label class="col-lg-1 control-label">URL</label>
+          <div class="col-lg-4">
+            <input type="text"
+              class="form-control" 
+              name="web_presence_urls[]" 
+              value="{{webpresence.url}}"/>
+            {% if session.errors['web_presences'][loop.index0]['url'] is defined %}<strong>{{session.errors['web_presences'][loop.index0]['url']}}</strong>{% endif %}
+          </div>
+          <label class="col-lg-2 control-label">Description</label>
+          <div class="col-lg-4">
+            <input type="text"
+              class="form-control" 
+              name="web_presence_descriptions[]" 
+              value="{{webpresence.description}}"/>
+            {% if session.errors['web_presences'][loop.index0]['description'] is defined %}<strong>{{session.errors['web_presences'][loop.index0]['description']}}</strong>{% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    {% elseif organisation %}
+      {% for webpresence in organisation.webPresences %}
+        <div class="form-group">
+          <label class="col-lg-1 control-label">URL</label>
+          <div class="col-lg-4">
+            <input type="text"
+              class="form-control" 
+              name="web_presence_urls[]" 
+              value="{{webpresence.url.url}}"/>
+          </div>
+          <label class="col-lg-2 control-label">Description</label>
+          <div class="col-lg-4">
+            <input type="text" 
+              class="form-control" 
+              name="web_presence_descriptions[]" 
+              value="{{webpresence.url.description.stringByLanguageCode(session.language)}}"/>
+          </div>
+        </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+{% include 'dynamic-fields.tpl.html' with {
+  'numDivs' : (session.autofill['web_presences'] is defined)?(session.autofill['web_presences']|length):(organisation is null?0:organisation.webPresences.count),
+  'maxNumDivs' : maxnumberwebpresences,
+  'rootDivId' : 'web_presences',
+  'baseDiv' : '<div class="form-group"> '
+        ~ '<label class="col-lg-1 control-label">URL</label>'
+        ~ '<div class="col-lg-4"><input type="text" class="form-control" name="web_presence_urls[]"/></div> '
+        ~ '<label class="col-lg-2 control-label">Description</label>'
+        ~ '<div class="col-lg-4"><input type="text" class="form-control" name="web_presence_descriptions[]"/></div> '
+        ~ '</div>',
+  'activeFieldSelector' : 'input[name="web_presence_urls[]"]',
+  'activeIdValue' : 'active',
+  'deleteItem' : '<button type="button" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span></button>',
+} %}
+</fieldset>
+
+<fieldset>
+  <legend>Sought projects</legend>
+  <label>Themes – <a data-op="themes-select-all" href="#">Select all</a> <a data-op="themes-deselect-all" href="#">Deselect all</a></label>
+  <div id="themes" class="{{ error_class(session.errors, 'themes') }}">
+    {% for theme in themes %}
+      <div class="checkbox">
+        <label>
+          {% if session.autofill['themes'] is defined %}
+          <input type="checkbox" name="themes[]" value="{{theme.label}}" {% if theme.label in session.autofill['themes'] %}checked="checked"{% endif %}>{{theme.name.stringByLanguageCode(session.language)}}</input>
+          {% elseif organisation.soughtThemes is defined %}
+          <input type="checkbox" name="themes[]" value="{{theme.label}}" {% if theme in organisation.soughtThemes %}checked="checked"{% endif %}>{{theme.name.stringByLanguageCode(session.language)}}</input>
+          {% else %}
+          <input type="checkbox" name="themes[]" value="{{theme.label}}" checked="checked">{{theme.name.stringByLanguageCode(session.language)}}</input>
+          {% endif %}
+        </label>
+      </div>
+    {% endfor %}
+    {{ error(session.errors, 'themes') }}
+  </div>
+<script type="text/javascript" src="/assets/js/organisation.js"></script>
+</fieldset>
+
+<button type="submit" class="btn btn-primary">Save</button>
+{% if organisation.id is not null %}
+<input type="hidden" name="organisation_id" value="{{ organisation.id }}" />
+{% endif %}
+<input type="hidden" name="token" value="{{ session.token }}" />
+<input type="hidden" name="action" value="organisation_save" />
+</form>
+<p><a href="/organisation/{{organisation.urlSlug}}">Cancel</a></p>
+{% endblock %}

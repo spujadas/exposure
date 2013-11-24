@@ -1,0 +1,108 @@
+{#
+   This file is part of the Exposure package.
+
+   Copyright 2013 by Sébastien Pujadas
+
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+#}
+
+{% from 'view_macros.tpl.html' import currency_value %}
+
+{% extends "page-left-nav.tpl.html" %}
+
+{% block content %}
+
+<h2>{{need.project.name}}</h2>
+{% if need.type == constant('\\Exposure\\Model\\ProjectNeed::TYPE_FINANCIAL') %}
+<p>Need: {{currency_value(need.amount, session.currency)}} – {{need.description.stringByLanguageCode(session.language)}}</p>
+{% else %}
+<p>{{need.description.stringByLanguageCode(session.language)}}</p>
+{% endif %}
+
+<p>Type: {{return.type.description.stringByLanguageCode(session.language)}}</p>
+
+<p>Description: {{return.description.stringByLanguageCode(session.language)}}</p>
+
+{% if userIsProjectOwner and not need.isFulfilled %}
+
+	<p><a href="/return-edit/{{return.id}}">Edit</a></p>
+
+{% elseif userIsProjectOwner or userIsProjectSponsor %}
+	{% set organisationName = return.need.contribution.contributor.name %}
+
+	{% if return.status == constant('\\Exposure\\Model\\SponsorReturn::STATUS_NOT_STARTED') %}
+		<p>The project team hasn't started providing compensation for {{organisationName}}.</p>
+		{% if userIsProjectOwner %}
+			<p id="return-start">
+				<a href="#" 
+					data-op="return-start" 
+					data-return-id="{{return.id}}" 
+					data-token="{{session.token}}" 
+					data-question="Do you confirm that you have started providing this compensation?"
+					data-yes-label="Yes, I have started providing this compensation"
+					data-no-label="No, I haven't started providing this compensation"
+					data-success-notification-text="{{organisationName}} has been notified."
+					data-success-text="You have confirmed that you have started providing this compensation, {{organisationName}} has been notified."
+					data-success-text-id="return-start">
+					I have started providing this compensation for {{organisationName}}.
+				</a>
+			</p>
+		{% elseif userIsProjectSponsor %}
+			<p>Waiting for the project team to start providing this compensation.</p>
+		{% endif %}
+
+	{% elseif return.status == constant('\\Exposure\\Model\\SponsorReturn::STATUS_IN_PROGRESS') %}
+		<p>The project team is working on this compensation for {{organisationName}}.</p>
+		{% if userIsProjectOwner %}
+			<p id="return-complete">
+				<a href="#" 
+					data-op="return-complete" 
+					data-return-id="{{return.id}}" 
+					data-token="{{session.token}}" 
+					data-question="Do you confirm that you have finished providing this compensation?"
+					data-yes-label="Yes, I have finished providing this compensation"
+					data-no-label="No, I haven't finished providing this compensation"
+					data-success-notification-text="{{organisationName}} has been notified."
+					data-success-text="You have confirmed that you have finished providing this compensation, {{organisationName}} has been notified."
+					data-success-text-id="return-complete">
+					I have finished providing this compensation for {{organisationName}}.
+				</a>
+			</p>
+		{% elseif userIsProjectSponsor %}
+			<p>Waiting for the project team to finish providing this compensation.</p>
+		{% endif %}
+
+	{% elseif return.status == constant('\\Exposure\\Model\\SponsorReturn::STATUS_COMPLETED_BY_PROJECT_OWNER') %}
+		<p>The project team claims they have finished providing compensation for {{organisationName}}.</p>
+		{% if userIsProjectOwner %}
+			<p>Waiting for {{organisationName}} to confirm.</p>
+		{% elseif userIsProjectSponsor %}
+			<p id="return-approve">
+				<a href="#" 
+					data-op="return-approve" 
+					data-return-id="{{return.id}}" 
+					data-token="{{session.token}}" 
+					data-question="Do you confirm that the project team has finished providing this compensation?"
+					data-yes-label="Yes, the project team has finished providing this compensation"
+					data-no-label="No, the project team hasn't finished providing this compensation"
+					data-success-notification-text="The project team has been notified."
+					data-success-text="You have confirmed that the compensation was provided, the project team has been notified."
+					data-success-text-id="return-approve">
+					I confirm that the project team has finished providing this compensation for {{organisationName}}.
+				</a>
+			</p>
+		{% endif %}
+
+	{% elseif return.status == constant('\\Exposure\\Model\\SponsorReturn::STATUS_APPROVED') %}
+	 	<p>The project team has provided this compensation for {{organisationName}}.</p>
+	{% endif %}
+
+	<script type="text/javascript" src="/assets/js/askAndPost.js"></script>
+{% endif %}
+
+<p><a href="/needs/{{need.project.urlSlug}}">Back to the list of project needs</a></p>
+<p><a href="/returns">Back to the list of compensations</a></p>
+<p><a href="/project/{{need.project.urlSlug}}">Back to the project page</a></p>
+
+{% endblock %}

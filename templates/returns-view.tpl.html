@@ -1,0 +1,37 @@
+{#
+   This file is part of the Exposure package.
+
+   Copyright 2013 by Sébastien Pujadas
+
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+#}
+
+{% extends "page-left-nav.tpl.html" %}
+
+{% block content %}
+
+{% if session.user.type == constant('\\Exposure\\Model\\User::TYPE_PROJECT_OWNER') %}
+<h1>Compensations by project</h1>
+	{% for project in user.ownedProjects if project.contributions|length %}
+		<h2><a href="/project/{{project.name}}">{{project.name}}</a></h2>
+		<ul class="list-group">
+			{% for contribution in project.contributions %}
+				{% include 'return-item.inc.tpl.html' %}
+			{% endfor %}
+		</ul>
+	{% endfor %}
+
+{% elseif session.user.type == constant('\\Exposure\\Model\\User::TYPE_SPONSOR') %}
+<h1>Compensations by organisation</h1>
+	{% for organisation in user.sponsorOrganisations if organisation.contributions|length %}
+		<h2><a href="organisation/{{organisation.name}}">{{organisation.name}}</a></h2>
+		<ul class="list-group">
+			{% for contribution in organisation.contributions %}
+				{% include 'return-item.inc.tpl.html' %}
+			{% endfor %}
+		</ul>
+	{% endfor %}
+{% endif %}
+
+{% endblock %}

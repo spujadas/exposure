@@ -1,0 +1,155 @@
+{#
+   This file is part of the Exposure package.
+
+   Copyright 2013 by Sébastien Pujadas
+
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+#}
+
+<li 
+	class="notification list-group-item" 
+	data-notification-type="{{ notification.type }}" 
+	data-notification-id="{{ notification.id }}">
+	<div class="notification-header">
+		<div class="notification-type">
+			{% if notification.status == constant('\\Exposure\\Model\\Notification::STATUS_UNREAD') %}
+				<span class="notification-unread">
+			{% elseif notification.status == constant('\\Exposure\\Model\\Notification::STATUS_ARCHIVED') %}
+				<span class="notification-archived">
+			{% else %}
+				<span class="notification-read">
+			{% endif %}
+			{% if notification.type == constant('\\Exposure\\Model\\Notification::TYPE_PROJECT_THEME_SUGGESTION') %}
+				Theme suggestion (not implemented)
+			{% elseif notification.type == constant('\\Exposure\\Model\\Notification::TYPE_PROJECT_MODERATION') %}
+				Project moderation: {{notification.project.name}}
+			{% elseif notification.type == constant('\\Exposure\\Model\\Notification::TYPE_PROFILE_MODERATION') %}
+				Profile moderation
+			{% elseif notification.type == constant('\\Exposure\\Model\\Notification::TYPE_PROJECT_WANT') %}
+				Project wanted by sponsor
+			{% elseif notification.type == constant('\\Exposure\\Model\\Notification::TYPE_SPONSOR_CONTRIBUTION') %}
+				Contribution
+			{% elseif notification.type == constant('\\Exposure\\Model\\Notification::TYPE_SPONSOR_RETURN') %}
+				Return
+			{% endif %}
+				</span>
+			{% if notification.status == constant('\\Exposure\\Model\\Notification::STATUS_UNREAD') %}
+				<span class="label label-info">unread</span>
+			{% endif %}
+		</div>
+
+		<div class="notification-ops">
+			{% if notification.status == constant('\\Exposure\\Model\\Notification::STATUS_UNREAD') %}
+				<a data-op="notification-mark-read" href="#">Mark as read</a>
+			{% endif %}
+			{% if notification.status != constant('\\Exposure\\Model\\Notification::STATUS_ARCHIVED') %}
+				<a data-op="notification-archive" href="#">Archive</a>
+			{% endif %}
+			<a data-op="notification-delete" href="#">Delete</a>
+		</div>
+
+		<div class="notification-date">
+			{{notification.dateTime|date('d/m/Y G:i')}}
+		</div>
+	</div>
+
+	{% if notification.type == constant('\\Exposure\\Model\\Notification::TYPE_PROJECT_THEME_SUGGESTION') %}
+		<p>(not implemented)</p>
+
+	{% elseif notification.type == constant('\\Exposure\\Model\\Notification::TYPE_PROJECT_MODERATION') %}
+		{% if notification.event == constant('\\Exposure\\Model\\ProjectModerationNotification::EVENT_APPROVED_PROJECT') %}
+			<p>Project is approved</p>
+		{% elseif notification.event == constant('\\Exposure\\Model\\ProjectModerationNotification::EVENT_FLAGGED_PROJECT') %}
+			<p>Project is flagged as inappropriate</p>
+		{% elseif notification.event == constant('\\Exposure\\Model\\ProjectModerationNotification::EVENT_REFUSED_PROJECT') %}
+			<p>Project is rejected</p>
+		{% elseif notification.event == constant('\\Exposure\\Model\\ProjectModerationNotification::EVENT_PROJECT_NEEDS_EDITING') %}
+			<p>Project needs editing</p>
+			{% if notification.content is not empty %}
+				<p><strong>Comment from {{appName}}</strong> — {{notification.content}}</p>
+			{% endif %}
+			<p><a href="/project-edit/{{notification.project.urlSlug}}">Edit your project</a></p>
+		{% endif %}
+
+	{% elseif notification.type == constant('\\Exposure\\Model\\Notification::TYPE_PROFILE_MODERATION') %}
+		{% if notification.event == constant('\\Exposure\\Model\\ProfileModerationNotification::EVENT_APPROVED_PROFILE') %}
+		<p>Profile is approved</p>
+		{% elseif notification.event == constant('\\Exposure\\Model\\ProfileModerationNotification::EVENT_REFUSED_PROFILE') %}
+		<p>Profile is refused</p>
+		{% elseif notification.event == constant('\\Exposure\\Model\\ProfileModerationNotification::EVENT_PROFILE_NEEDS_EDITING') %}
+		<p>Profile needs editing</p>
+		{% if notification.content is not empty %}
+		<p><strong>Comment from {{appName}}</strong> — {{notification.content}}</p>
+		{% endif %}
+		<p><a href="/profile-edit">Edit your profile</a></p>
+		{% endif %}
+
+	{% elseif notification.type == constant('\\Exposure\\Model\\Notification::TYPE_PROJECT_WANT') %}
+		{% set canSeeSponsorOrganisation = user.canSeeSponsorOrganisation(notification.want.sponsorOrganisation) %}
+		<p>{% if canSeeSponsorOrganisation %}<a href="/organisation/{{notification.want.sponsorOrganisation.name}}">{{notification.want.sponsorOrganisation.name}}</a>, a{% else %}A{% endif %} sponsor from the "{{notification.want.sponsorOrganisation.businessSector.name.stringByLanguageCode(session.language)}}" business sector{% if canSeeSponsorOrganisation %}, {% endif %} wants to sponsor project <a href="/project/{{project.name}}">{{project.name}}</a></p>
+
+	{% elseif notification.type == constant('\\Exposure\\Model\\Notification::TYPE_SPONSOR_CONTRIBUTION') %}
+		{% if notification.event == constant('\\Exposure\\Model\\SponsorContributionNotification::EVENT_PROPOSAL_SUBMITTED_BY_SPONSOR') %}
+		<p>
+			<a href="/organisation/{{notification.contribution.contributor.name}}">{{notification.contribution.contributor.name}}</a> 
+			wants to 
+			<a href="/contribution/{{notification.contribution.id}}">contribute</a> 
+			to project
+			<a href="/project/{{notification.contribution.project.name}}">{{notification.contribution.project.name}}</a>
+		</p>
+		{% elseif notification.event == constant('\\Exposure\\Model\\SponsorContributionNotification::EVENT_PROPOSAL_APPROVED') %}
+		<p>
+			Proposal to
+			<a href="/contribution/{{notification.contribution.id}}">contribute</a> to project 
+			<a href="/project/{{notification.contribution.project.name}}">{{notification.contribution.project.name}}</a>
+			by 
+			<a href="/organisation/{{notification.contribution.contributor.name}}">{{notification.contribution.contributor.name}}</a>
+			is approved
+		</p>
+		{% elseif notification.event == constant('\\Exposure\\Model\\SponsorContributionNotification::EVENT_CONTRIBUTION_SENT') %}
+		<p>
+			A <a href="/contribution/{{notification.contribution.id}}">contribution</a> to project 
+			<a href="/project/{{notification.contribution.project.name}}">{{notification.contribution.project.name}}</a>
+			has been sent by 
+			<a href="/organisation/{{notification.contribution.contributor.name}}">{{notification.contribution.contributor.name}}</a>
+		</p>
+		{% elseif notification.event == constant('\\Exposure\\Model\\SponsorContributionNotification::EVENT_CONTRIBUTION_RECEIVED') %}
+		<p>
+			A <a href="/contribution/{{notification.contribution.id}}">contribution</a> to project
+			<a href="/project/{{notification.contribution.project.name}}">{{notification.contribution.project.name}}</a>
+			by
+			<a href="/organisation/{{notification.contribution.contributor.name}}">{{notification.contribution.contributor.name}}</a>
+			has been received
+		</p>
+		{% endif %}
+
+	{% elseif notification.type == constant('\\Exposure\\Model\\Notification::TYPE_SPONSOR_RETURN') %}
+		{% if notification.event == constant('\\Exposure\\Model\\SponsorReturnNotification::EVENT_STARTED') %}
+		<p>
+			The "<a href="/project/{{notification.return.need.project.name}}">{{notification.return.need.project.name}}</a>" project team
+			has started fulfilling
+			<a href="/return/{{notification.return.id}}">its part</a> 
+			of the exchange for
+			<a href="/organisation/{{notification.return.need.contribution.contributor.urlSlug}}">{{notification.return.need.contribution.contributor.name}}</a> 
+			
+		</p>
+		{% elseif notification.event == constant('\\Exposure\\Model\\SponsorReturnNotification::EVENT_COMPLETED_BY_PROJECT') %}
+		<p>
+			The "<a href="/project/{{notification.return.need.project.name}}">{{notification.return.need.project.name}}</a>" project team
+			has completed
+			<a href="/return/{{notification.return.id}}">its part</a> 
+			of the exchange for
+			<a href="/organisation/{{notification.return.need.contribution.contributor.urlSlug}}">{{notification.return.need.contribution.contributor.name}}</a> 
+		</p>
+		{% elseif notification.event == constant('\\Exposure\\Model\\SponsorReturnNotification::EVENT_APPROVED') %}
+		<p>
+			<a href="/organisation/{{notification.return.need.contribution.contributor.urlSlug}}">{{notification.return.need.contribution.contributor.name}}</a>
+			have approved that the 
+			"<a href="/project/{{notification.return.need.project.name}}">{{notification.return.need.project.name}}</a>"
+			have completed <a href="/return/{{notification.return.id}}">their part</a> 
+			of the exchange
+		</p>
+		{% endif %}
+	{% endif %}
+</li>

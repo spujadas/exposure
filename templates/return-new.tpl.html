@@ -1,0 +1,64 @@
+{#
+   This file is part of the Exposure package.
+
+   Copyright 2013 by Sébastien Pujadas
+
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+#}
+
+{% from 'view_macros.tpl.html' import currency_value %}
+{% from 'form_macros.tpl.html' import error, autofill, error_class %}
+
+{% extends "page-left-nav.tpl.html" %}
+
+{% block content %}
+
+<h1>{{project.name}} – New compensation</h1>
+{% if need.type == constant('\\Exposure\\Model\\ProjectNeed::TYPE_FINANCIAL') %}
+<p>Need – {{currency_value(need.amount, session.currency)}} – {{need.description.stringByLanguageCode(session.language)}}</p>
+{% else %}
+<p>Need – {{need.description.stringByLanguageCode(session.language)}}</p>
+{% endif %}
+
+<form role="form" class="form-horizontal" method="post" action="/">
+<div class="form-group{{ error_class(session.errors, 'type') }}">
+  	<label class="col-lg-2 control-label" for="type">Type</label>
+  	<div class="col-lg-10">
+		<select class="form-control" name="type" id="type">
+			<option value=""/>-- select a type of compensation</option>
+		    {% for typeitem in typetree %}
+		    	<option value="{{ typeitem.label }}"{% if session.autofill['type'] == typeitem.label %} selected="selected"{% endif %}>{{typeitem.description.stringByLanguageCode(session.language)}}</option>
+		    {% endfor %}
+		</select> {{ error(session.errors, 'type') }}
+	</div>
+</div>
+
+<div class="form-group{{ error_class(session.errors, 'description') }}">
+  	<label class="col-lg-2 control-label" for="description">Description</label>
+  	<div class="col-lg-10">
+		<textarea class="form-control" name="description" id="description" 
+			maxlength="{{constant('\\Exposure\\Model\\SponsorReturn::DESCRIPTION_MAX_LENGTH')}}">{{ 
+			autofill(session.autofill, 'description') 
+		}}</textarea>
+		{{ error(session.errors, 'description') }}
+	</div>
+</div>
+
+{% if need.type == constant('\\Exposure\\Model\\ProjectNeed::TYPE_FINANCIAL') %}
+<input type="hidden" name="need_type" value="financial-need-by-amount" />
+{% else %}
+<input type="hidden" name="need_type" value="non-financial-need" />
+{% endif %}
+<input type="hidden" name="need_id" value="{{ need.id }}" />
+<input type="hidden" name="action" value="return_create" />
+<input type="hidden" name="token" value="{{ session.token }}" />
+<button type="submit" class="btn btn-primary">Save</button>
+</form>
+
+{% if need.type == constant('\\Exposure\\Model\\ProjectNeed::TYPE_FINANCIAL') %}
+<p><a href="/return/financial-need-by-amount/{{need.id}}">Cancel</a></p>
+{% else %}
+<p><a href="/return/non-financial-need/{{need.id}}">Cancel</a></p>
+{% endif %}
+{% endblock %}

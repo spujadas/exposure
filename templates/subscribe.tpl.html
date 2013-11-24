@@ -1,0 +1,33 @@
+{#
+   This file is part of the Exposure package.
+
+   Copyright 2013 by Sébastien Pujadas
+
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+#}
+
+{% extends "page-left-nav.tpl.html" %}
+
+{% block content %}
+<h1>Subscribe</h1>
+{% for subscription in subscriptions %}
+
+<div class="col-md-4 text-center">
+	<div class="well">
+		<h2 class="text-primary">{{subscription.durationInMonths}} months</h2>
+		{% set monthlyPrice = subscription.monthlyPrice %}
+		{% set value = monthlyPrice.valueByCurrencyCode(session.currency, true) %}
+		{% set currencyCode = monthlyPrice.currencyCode(session.currency) %}
+		<h3>{{ value }}{{monthlyPrice.symbol(currencyCode)}} per month</h3>
+		<p class="text-muted">Total: 
+			{{ subscription.durationInMonths * value}}{{ monthlyPrice.symbol(currencyCode) }}
+		</p>
+		<hr/>
+		<p><a class="btn btn-primary" href="/subscription-order/{{subscription.id}}">Subscribe</a></p>
+	</div>
+</div>
+
+{% endfor %}
+
+{% endblock %}

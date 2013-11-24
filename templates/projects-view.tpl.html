@@ -1,0 +1,39 @@
+{#
+   This file is part of the Exposure package.
+
+   Copyright 2013 by Sébastien Pujadas
+
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+#}
+
+{% extends "page-left-nav.tpl.html" %}
+
+{% block content %}
+<h1>My projects</h1>
+{% if user.ownedProjects.count == 0 %}
+<p>No projects yet.</p>
+{% else %}
+<ul>
+{% for project in user.ownedProjects %}
+<li><a href="/project/{{project.urlSlug}}">{{project.name}}</a> {% 
+	if project.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_FIRST_USER_EDIT') %}
+	<span class="label label-warning">Unpublished</span>
+	{% elseif project.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_USER_EDIT') %}
+	<span class="label label-warning">Changed since last publication</span>
+	{% elseif project.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_APPROVED') %}
+	<span class="label label-success">Published</span>
+	{% elseif (project.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_SUBMITTED'))
+		or (project.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_SUBMITTED_FIRST_TIME')) %}
+	<span class="label label-info">Pending moderation</span>
+	{% elseif project.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_FLAGGED') %}
+	<span class="label label-warning">Flagged as inappropriate</span>
+	{% elseif project.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_REJECTED') %}
+	<span class="label label-danger">Rejected</span>
+	{% endif 
+%}</li>
+{% endfor %}
+</ul>
+{% endif %}
+<p><a href="/project-edit">Add a project</a></p>
+{% endblock %}

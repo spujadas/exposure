@@ -1,0 +1,72 @@
+<?php
+
+/*
+ * This file is part of the Exposure package.
+ *
+ * Copyright 2013 by Sébastien Pujadas
+ *
+ * For the full copyright and licence information, please view the LICENCE
+ * file that was distributed with this source code.
+ */
+
+// Sociable configuration file template - pre-customised for Exposure
+
+$config = new Sociable\Common\Configuration;
+
+// Mongo Document Manager
+$config->setDocumentManagerParams(
+	'DB_USER',  // customise this
+	'DB_PASSWORD',  // customise this
+	'DB_HOST',  // customise this
+	'DB_PORT',  // customise this
+	'DB_NAME',  // customise this
+	EXPOSURE_ROOT . '/model/cache',
+	'Proxies',
+	EXPOSURE_ROOT . '/model/cache',
+	'Hydrators',
+	array(
+		EXPOSURE_ROOT . '/model/Sociable', 
+		EXPOSURE_ROOT . '/model/Exposure'
+	)
+);
+
+// Twig
+$config->setTwigParams(
+    EXPOSURE_ROOT . '/templates', 
+    array(
+        'cache' => EXPOSURE_ROOT . '/templates/cache',
+        'auto_reload' => true // remove in production
+    ),
+    true // debug mode, set to false remove in production
+);
+
+// Monolog logger
+$config->setLoggerParams('Exposure', EXPOSURE_ROOT . '/sys/log/exposure.log', Monolog\Logger::WARNING); // customise this
+
+// SwiftMailer
+$config->setSmtpParams('SMTP_SERVER', SMTP_PORT, 'ssl', 'SMTP_LOGIN', 'SMTP_PASSWORD'); // customise this
+$config->setParam('emailFromAddress', 'EMAIL_FROM_ADDRESS'); // customise this
+$config->setParam('emailFromName', 'EMAIL_FROM_NAME'); // customise this
+
+// default URL
+$config->setParam('hostname', 'HOSTNAME');
+
+// locale defaults
+$config->setParam('defaultCountryCode', 'DEFAULT_COUNTRY_CODE'); // customise this e.g. 'FR', 'GB'
+$config->setParam('defaultLanguageCode', 'DEFAULT_LANGUAGE_CODE'); // customise this e.g. en
+$config->setParam('defaultCurrencyCode', 'DEFAULT_CURRENCY_CODE'); // customise this e.g. 'EUR', 'GBP'
+
+// default rights
+$config->setParam('displayDescription', false);
+$config->setParam('numberDisplayedPhotos', 1);
+$config->setParam('displayWebPresence', false);
+
+// admin singleton
+$config->setParam('adminLabel', 'ADMIN');
+
+// app name
+$config->setParam('appName', 'Exposure'); // customise this
+
+// decorator
+$config->setParam('cssFiles', array());
+$config->setParam('title', 'Your organisation and your projects in the limelight'); // customise this

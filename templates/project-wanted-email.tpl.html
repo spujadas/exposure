@@ -1,0 +1,25 @@
+{#
+   This file is part of the Exposure package.
+
+   Copyright 2013 by Sébastien Pujadas
+
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+#}
+
+{% extends 'notification-email.tpl.html' %}
+
+{% block subject %}{{parent()}}A sponsor is interested by {{project.name}}{% endblock %}
+
+{% block body_html %}
+
+<p>{% if canSeeSponsor %}{{organisation.name}}{% else %}A sponsor{% endif %} (business sector: {{organisation.businessSector.name.stringByLanguageCode(language)}}) is interested by {{project.name}}.</p>
+
+{{ parent() }}
+{% endblock %}
+
+{% block body_text %}
+{% if canSeeSponsor %}{{organisation.name}}{% else %}A sponsor{% endif %} (business sector: {{organisation.businessSector.name.stringByLanguageCode(language)}}) is interested by {{project.name}}.
+
+{{ parent() }}
+{% endblock %}

@@ -1,0 +1,114 @@
+{#
+   This file is part of the Exposure package.
+
+   Copyright 2013 by Sébastien Pujadas
+
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+#}
+
+{% from 'form_macros.tpl.html' import error, autofill, autofill_or_value, value_if_autofill_or_boolean, error_class %}
+
+{% extends "page-left-nav.tpl.html" %}
+
+{% block content %}
+<h1>Profile</h1>
+<form method="post" class="form-horizontal" enctype="multipart/form-data" action="/">
+
+  <div class="form-group{{ error_class(session.errors, 'name') }}">
+    <label class="col-lg-2 control-label" for="name">Name</label>
+    <div class="col-lg-10">
+      <input type="text" class="form-control" id="name" name="name" placeholder="name" 
+             maxlength="254" value="{{ autofill_or_value (session.autofill, 'name', user.name) }}" />
+      {{ error(session.errors, 'name') }}
+    </div>
+  </div>
+
+  <div class="form-group{{ error_class(session.errors, 'surname') }}">
+    <label class="col-lg-2 control-label" for="surname">Surname</label>
+    <div class="col-lg-10">
+      <input type="text" class="form-control" id="surname" name="surname" placeholder="surname" 
+             maxlength="254" value="{{ autofill_or_value (session.autofill, 'surname', user.surname) }}" />
+      {{ error(session.errors, 'surname') }}
+    </div>
+  </div>
+
+  <div class="form-group{{ error_class(session.errors, 'email') }}">
+    <label class="col-lg-2 control-label" for="email">Email</label>
+    <div class="col-lg-10">
+      <input type="email" class="form-control" id="email" name="email" placeholder="email" 
+             maxlength="254" value="{{ autofill_or_value (session.autofill, 'email', user.email) }}" />
+      {{ error(session.errors, 'email') }}
+    </div>
+  </div>
+
+  <div class="form-group{{ error_class(session.errors, 'email_check') }}">
+    <label class="col-lg-2 control-label" for="email_check">Email (confirm)</label>
+    <div class="col-lg-10">
+      <input type="email" class="form-control" id="email_check" name="email_check" placeholder="email (confirm)" 
+             maxlength="254" value="{{ autofill_or_value (session.autofill, 'email_check', user.email) }}" />
+      {{ error(session.errors, 'email_check') }}
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="col-lg-2 control-label">Password</label>
+    <div class="col-lg-10">
+      <p class="form-control-static"><a href="/password-change">Change password</a></p>
+    </div>
+  </div>
+
+  <div class="form-group{{ error_class(session.errors, 'country') }}">
+    <label class="col-lg-2 control-label" for="country">Country</label>
+    <div class="col-lg-10">
+      <select name="country" class="form-control" id="country">
+          <option value=""></option>
+          {% for c in countries %}
+          <option value="{{ c.code }}"{% if (country is defined) and (country == c.code) %} selected="selected"{% endif %}>{{c.name.stringByLanguageCode(session.language)}}</option>
+          {% endfor %}
+      </select>
+    {{ error(session.errors, 'country') }}
+    </div>
+  </div>
+<script type="text/javascript" src="/assets/js/country.js"></script>
+
+
+  <div id="location">
+  {% include 'location.inc.tpl.html' %}
+  </div>
+
+  <div class="form-group{{ error_class(session.errors, 'photo') }}">
+    <label class="col-lg-2 control-label" for="photo">Photo (2 Mo max.)</label>
+    <div class="col-lg-10">
+      {% if user.photo %}
+        {% if user.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_APPROVED') %}
+        <div class="alert alert-warning">If you change your photo, you will have to resubmit your profile to be moderated.</div>
+        {% endif %}
+        <img src="/profile-photo/{{user.id}}" width="120" alt="{{user.name}} {{user.surname}}"/>
+      {% endif %}
+      <input type="hidden" name="MAX_FILE_SIZE" value="2097152"/>
+      <input type="file" name="photo"/>
+      {{ error(session.errors, 'photo') }}
+    </div>
+  </div>
+
+  <div class="form-group{{ error_class(session.errors, 'presentation') }}">
+    <label class="col-lg-2 control-label" for="presentation">Presentation</label>
+    <div class="col-lg-10">
+      {% if user.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_APPROVED') %}
+      <div class="alert alert-warning">If you update your presentation, you will have to resubmit your profile to be moderated.</div>
+      {% endif %}
+      <textarea class="form-control" name="presentation" id="presentation" 
+        maxlength="{{constant('\\Exposure\\Model\\User::PRESENTATION_MAX_LENGTH')}}"
+        placeholder="presentation">{{ autofill_or_value(session.autofill, 'presentation', user.presentation.stringByLanguageCode(session.language)) }}</textarea>
+      {{ error(session.errors, 'presentation') }}
+    </div>
+  </div>
+
+  <button type="submit" class="btn btn-primary">Save</button>
+  <input type="hidden" name="token" value="{{ session.token }}" />
+  <input type="hidden" name="action" value="profile_save" />
+</form>
+
+<p><a href="/profile">Cancel</a></p>
+{% endblock %}

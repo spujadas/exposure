@@ -1,0 +1,142 @@
+{#
+   This file is part of the Exposure package.
+
+   Copyright 2013 by Sébastien Pujadas
+
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+#}
+
+{% extends "page-admin.tpl.html" %}
+
+{% block content %}
+
+<h1>Project moderation</h1>
+
+<h4>Name</h4>
+<p>{{project.name}}</p>
+
+<h4>Theme</h4>
+<p>{{ themetree|join(' > ') }}</p>
+
+<h4>Summary</h4>
+<p>{% include 'admin-string-moderate.inc.tpl.html' with { 'string' : project.summary, 'stringname' : 'summary' } %}</p>
+
+<h4>Audience</h4>
+<p>{% include 'admin-string-moderate.inc.tpl.html' with { 'string' : project.audienceDescription, 'stringname' : 'audience_description' } %}</p>
+
+<p>Between {{project.audienceRange['min']}} and {{project.audienceRange['max']}} people.</p>
+
+<h4>Description</h4>
+<p>{% include 'admin-string-moderate.inc.tpl.html' with { 'string' : project.description, 'stringname' : 'description' } %}</p>
+
+<h4>Photos</h4>
+<table class="table">
+	<tr>
+		<th>Current</th>
+		<th>Previous</th>
+		{% if project.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_SUBMITTED') 
+			or project.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_SUBMITTED_FIRST_TIME') %}
+		<th>Moderation</th>
+		{% endif %}
+	</tr>
+
+	{% for photo in project.photos %}
+	<tr>
+		<td>
+			<img src="/project-photo/{{project.urlSlug}}/{{photo.id}}/current" class="photo-thumbnail" width="120" alt="{{photo.current.description.stringByLanguageCode(session.language)}}"/>
+		    <p>{{photo.current.description.stringByLanguageCode(session.language)}}</p>
+		    {% if photo.moderationStatus.status != constant('\\Exposure\\Model\\ModerationStatus::STATUS_APPROVED') %}<p>(unpublished)</p>{% endif %}
+	    </td>
+		<td>
+	    	{% if photo.previous is not null %}
+			<img src="/project-photo/{{project.urlSlug}}/{{photo.id}}/previous" class="photo-thumbnail" width="120" alt="{{photo.previous.description.stringByLanguageCode(session.language)}}"/>
+		    <p>{{photo.previous.description.stringByLanguageCode(session.language)}}</p>
+	    	{% endif %}
+	    </td>
+	    {% if project.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_SUBMITTED') 
+			or project.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_SUBMITTED_FIRST_TIME') %}
+	    <td>
+	    	<div class="moderation-ops">
+				<span class="status">
+				{% if photo.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_SUBMITTED') %}
+					Submitted for publication
+				{% elseif photo.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_APPROVED') %}
+					Approved
+				{% elseif photo.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_USER_EDIT') %}
+					Photo is being edited by the user
+				{% endif %}
+				</span>
+				<a data-op="approve" data-success="Approved" href="#">Approve</a>
+				<a data-op="request_editing" data-success="Photo is being edited by the user" href="#">Request edition</a>
+				<input type="hidden" name="project_id" value="{{ project.id }}" />
+				<input type="hidden" name="photo_id" value="{{ photo.id }}" />
+				<input type="hidden" name="token" value="{{ session.token }}" />
+				<input type="hidden" name="action" value="admin_project_moderate_photo" />
+			</div>
+	    </td>
+		{% endif %}
+	</tr>
+	{%endfor%}
+</table>
+
+<h4>Location</h4>
+<p>{{ locationtree|join(' > ') }}</p>
+
+<h4>Web</h4>
+<ul>
+{% for webpresence in project.webPresences %}
+  <li><a href="{{webpresence.url.url}}">{{webpresence.url.url}}</a>{% if webpresence.url.description.stringByLanguageCode(session.language) is not empty %} – {{webpresence.url.description.stringByLanguageCode(session.language)}}{% endif %}</li>
+{% endfor %}
+</ul>
+
+<h4>Status</h4>
+{% if project.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_USER_EDIT') 
+	or project.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_FIRST_USER_EDIT') %}
+<p><strong>Project is being edited by the user</strong></p>
+{% else %}
+	<form role="form" class="form-horizontal" method="post" action="/">
+		{% if project.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_SUBMITTED') 
+			or project.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_SUBMITTED_FIRST_TIME') %}
+		<p><strong>Project submitted for publication.</strong></p>
+		<button type="submit" name="approve">Approve</button>
+		<p>
+			<label for="comment">Comment (optional)</label>
+			<textarea id="comment" class="form-control" type="text" name="comment" maxlength="140"></textarea>
+			<button type="submit" class="btn btn-default" name="request_editing">Request editing</button>
+			<button type="submit" class="btn btn-default" name="reject">Reject (final)</button>
+		</p>
+		{% elseif project.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_FLAGGED') %}
+		<p><strong>Project flagged as inappropriate.</strong></p>
+		<button type="submit" class="btn btn-default" name="approve">Approve</button>
+		<p>
+			<label for="comment">Comment (optional)</label>
+			<textarea id="comment" class="form-control" type="text" name="comment" maxlength="140"></textarea>
+			<button type="submit" class="btn btn-default" name="request_editing">Request editing</button>
+			<button type="submit" class="btn btn-default" name="reject">Reject (final)</button>
+		</p>
+		{% elseif project.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_APPROVED') %}
+		<p><strong>Project is approved.</strong></p>
+		<p>
+			<label for="comment">Comment (optional)</label>
+			<textarea id="comment" class="form-control" type="text" name="comment" maxlength="140"></textarea>
+			<button type="submit" class="btn btn-default" name="request_editing">Request editing</button>
+			<button type="submit" class="btn btn-default" name="reject">Reject (final)</button>
+		</p>
+		{% elseif project.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_REJECTED') %}
+		<p><strong>Project is rejected.</strong></p>
+		<p>
+			<label for="comment">Comment (optional)</label>
+			<textarea id="comment" class="form-control" type="text" name="comment" maxlength="140"></textarea>
+			<button type="submit" class="btn btn-default" name="approve">Approve</button>
+			<button type="submit" class="btn btn-default" name="request_editing">Request editing</button>
+		</p>
+		{% endif %}
+	<input type="hidden" name="project_id" value="{{ project.id }}" />
+	<input type="hidden" name="token" value="{{ session.token }}" />
+	<input type="hidden" name="action" value="admin_project_moderate" />
+	</form>
+{% endif %}
+
+<script type="text/javascript" src="/assets/js/moderation.js"></script>
+{% endblock %}

@@ -1,0 +1,30 @@
+{#
+   This file is part of the Exposure package.
+
+   Copyright 2013 by Sébastien Pujadas
+
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+#}
+
+{% extends "page-left-nav.tpl.html" %}
+
+{% block content %}
+
+<h1>Bookmarks</h1>
+{% if user.bookmarkedProjects.count == 0 %}
+	<p>No bookmarks yet.</p>
+{% else %}
+	<ul class="list-group" data-token="{{session.token}}">
+		{% for project in user.bookmarkedProjects %}
+			<li class="list-group-item">
+				<a href="/project/{{project.urlSlug}}">{{project.name}}</a> 
+				<a href="#" data-op="bookmark-remove" data-project-id="{{project.id}}">Remove this bookmark</a>
+			</li>
+		{% endfor %}
+	</ul>
+{% endif %}
+
+<script type="text/javascript" src="/assets/js/bookmark.js"></script>
+
+{% endblock %}

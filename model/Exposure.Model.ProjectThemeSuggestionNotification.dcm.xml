@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+   This file is part of the Exposure package.
+ 
+   Copyright 2013 by Sébastien Pujadas
+ 
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+-->
+
+<doctrine-mongo-mapping xmlns="http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping
+                    http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping.xsd">
+
+    <document name="Exposure\Model\ProjectThemeSuggestionNotification" collection="projectthemesuggestionnotifications">
+        <reference-one field="from" target-document="Exposure\Model\User"/>
+        <reference-one field="parentTheme" target-document="Exposure\Model\Theme"/>
+        <field name="themeName" type="string" />
+    </document>
+
+</doctrine-mongo-mapping>

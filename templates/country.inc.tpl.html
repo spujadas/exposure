@@ -1,0 +1,25 @@
+{#
+   This file is part of the Exposure package.
+
+   Copyright 2013 by Sébastien Pujadas
+
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+#}
+
+{% from 'form_macros.tpl.html' import error, error_class %}
+
+<div class="form-group{{ error_class(session.errors, 'country') }}">
+  <label class="col-lg-2 control-label" for="country">Country</label>
+  <div class="col-lg-10">
+    <select name="country" class="form-control" id="country">
+        <option value=""></option>
+        {% for c in countries %}
+        <option value="{{ c.code }}"{% if (country is defined) and (country == c.code) %} selected="selected"{% endif %}>{{c.name.stringByLanguageCode(session.language)}}</option>
+        {% endfor %}
+    </select>
+  {{ error(session.errors, 'country') }}
+  </div>
+</div>
+  
+<script type="text/javascript" src="/assets/js/country.js"></script>

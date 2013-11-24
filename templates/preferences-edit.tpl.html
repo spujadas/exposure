@@ -1,0 +1,84 @@
+{#
+   This file is part of the Exposure package.
+
+   Copyright 2013 by Sébastien Pujadas
+
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+#}
+
+{% from 'form_macros.tpl.html' import error, autofill, autofill_or_value, value_if_autofill_or_boolean %}
+
+{% extends "page-left-nav.tpl.html" %}
+
+{% block content %}
+
+<form role="form" class="form-horizontal" method="post" action="/">
+  {% if user.type ==  constant('\\Exposure\\Model\\User::TYPE_PROJECT_OWNER') %}
+<h1>Project owner preferences</h1>
+
+<div class="checkbox">
+  <label>
+    <input type="checkbox" name="receive_notifications_by_email" value="y" {% if user.projectOwnerPreferences.receiveNotificationsByEmail %}checked="checked"{% endif %}>Receive all notifications by email</input>
+  </label>
+</div>
+
+<div class="checkbox">
+  <label>
+    <input type="checkbox" name="receive_notifications_by_email_when_wanted" value="y" {% if user.projectOwnerPreferences.receiveNotificationsByEmailWhenWanted %}checked="checked"{% endif %}>Receive notifications by email when wanted <em>(not implemented)</em></input>
+  </label>
+</div>
+
+<div class="checkbox">
+  <label>
+    <input type="checkbox" name="receive_periodic_digest_by_email_project_owner" value="y" {% if user.projectOwnerPreferences.receivePeriodicDigestByEmail %}checked="checked"{% endif %}>Receive periodic digest by email <em>(not implemented)</em></input>
+  </label>
+</div>
+
+<div class="checkbox">
+    <label>
+  <input type="checkbox" name="receive_newsletter" value="y" {% if user.projectOwnerPreferences.receiveNewsletter %}checked="checked"{% endif %}>Receive newsletter <em>(not implemented)</em></input>
+  </label>
+</div>
+
+<div class="checkbox">
+  <label>
+    <input type="checkbox" name="receive_notifications_when_commented" value="y" {% if user.projectOwnerPreferences.receiveNotificationsWhenCommented %}checked="checked"{% endif %}>Receive notifications when commented <em>(not implemented)</em></input>
+  </label>
+</div>
+
+<div class="checkbox">
+  <label>
+    <input type="checkbox" name="receive_notifications_when_subscription_will_expire" value="y" {% if user.projectOwnerPreferences.receiveNotificationsWhenSubscriptionWillExpire %}checked="checked"{% endif %}>Receive notifications when subscription is about to expire <em>(not implemented)</em></input>
+  </label>
+</div>
+{% endif %}
+
+{% if user.type ==  constant('\\Exposure\\Model\\User::TYPE_SPONSOR') %}
+<h1>Sponsor preferences</h1>
+<div class="checkbox">
+  <label>
+    <input type="checkbox" name="receive_notifications_by_email" value="y" {% if user.sponsorUserPreferences.receiveNotificationsByEmail %}checked="checked"{% endif %}>Receive all notifications by email</input>
+  </label>
+</div>
+
+<div class="checkbox">
+  <label>
+    <input type="checkbox" name="receive_daily_digest_by_email" value="y" {% if user.sponsorUserPreferences.receiveDailyDigestByEmail %}checked="checked"{% endif %}>Receive daily digest by email <em>(not implemented)</em></input>
+  </label>
+</div>
+
+<div class="checkbox">
+  <label>
+    <input type="checkbox" name="receive_periodic_digest_by_email_sponsor" value="y" {% if user.sponsorUserPreferences.receivePeriodicDigestByEmail %}checked="checked"{% endif %}>Receive periodic digest by email <em>(not implemented)</em></input>
+  </label>
+</div>
+{% endif %}
+
+<button type="submit" class="btn btn-primary">Save</button>
+<input type="hidden" name="token" value="{{ session.token }}" />
+<input type="hidden" name="action" value="preferences_save" />
+</form>
+
+<p><a class="cancel" href="/profile">Cancel</a></p>
+{% endblock %}

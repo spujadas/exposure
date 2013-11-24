@@ -1,0 +1,47 @@
+{#
+   This file is part of the Exposure package.
+
+   Copyright 2013 by Sébastien Pujadas
+
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+#}
+
+{% from 'view_macros.tpl.html' import currency_value %}
+{% from 'form_macros.tpl.html' import autofill_or_value %}
+
+{% extends "page-left-nav.tpl.html" %}
+
+{% block content %}
+
+<h1>{{financialneed.project.name}}</h1>
+<h2>Edit financial need</h2>
+
+{% if financialneed.totalamount.valueByCurrencyCode(session.currency) is null %}
+	{% set value = financialneed.totalamount.defaultValue %}
+	{% set currency = financialneed.totalamount.defaultCurrencyCode %}
+{% else %}
+	{% set value = financialneed.totalamount.valueByCurrencyCode(session.currency) %}
+	{% set currency = session.currency %}
+{% endif %}
+{% set value_form = autofill_or_value(session.autofill, 'total_amount_value', value) %}
+
+<form role="form" class="form-horizontal" method="post" action="/">
+	<div class="form-group">
+		<label class="col-lg-2 control-label" for="total_amount_value">Current need</label>
+		<div class="col-lg-10">
+			<p class="form-control-static">{{ value }} {{ currency }}</p>
+		</div>
+	</div>
+
+	{% include 'financial-need-form-fields.inc.tpl.html' %}
+
+	<input type="hidden" name="currency" value="{{ currency }}"/>
+	<input type="hidden" name="financial_need_id" value="{{ financialneed.id }}" />
+	<input type="hidden" name="token" value="{{ session.token }}" />
+	<input type="hidden" name="action" value="financial_need_save" />
+</form>
+
+<p><a href="/needs/{{financialneed.project.urlSlug}}">Cancel</a></p>
+
+{% endblock %}

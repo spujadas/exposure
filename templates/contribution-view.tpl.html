@@ -1,0 +1,99 @@
+{#
+   This file is part of the Exposure package.
+
+   Copyright 2013 by Sébastien Pujadas
+
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+#}
+
+{% from 'view_macros.tpl.html' import currency_value %}
+
+{% extends "page-left-nav.tpl.html" %}
+
+{% block content %}
+
+{% set need = contribution.contributedNeed %}
+{% set organisationName = contribution.contributor.name %}
+
+<h1>{{contribution.project.name}}</h1>
+{% if need.type == constant('\\Exposure\\Model\\ProjectNeed::TYPE_FINANCIAL') %}
+<h2>Need: {{currency_value(need.amount, session.currency)}} – {{need.description.stringByLanguageCode(session.language)}}</h2>
+{% else %}
+<h2>Need: {{need.description.stringByLanguageCode(session.language)}}</h2>
+{% endif %}
+
+
+{% if contribution.status == constant('\\Exposure\\Model\\SponsorContribution::STATUS_PROPOSAL_SUBMITTED_BY_SPONSOR') %}
+	<p>{{organisationName}} would like to fulfill this need in exchange for the following:
+	{{need.return.description.stringByLanguageCode(session.language)}}.</p>
+	{% if userIsProjectOwner %}
+		<p id="contribution-proposal-approval">
+			<a href="#" 
+				data-op="contribution-proposal-approve" 
+				data-contribution-id="{{contribution.id}}" 
+				data-token="{{session.token}}" 
+				data-question="Do you confirm that you have agreed to this exchange with {{organisationName}}?"
+				data-yes-label="I have agreed to this exchange"
+				data-no-label="I have not agreed to this exchange"
+				data-success-notification-text="Thank you for your confirmation, {{organisationName}} has been notified."
+				data-success-text="The proposal has been accepted, {{organisationName}} has been notified."
+				data-success-text-id="contribution-proposal-approval">
+				I confirm that I have agreed to this exchange with {{organisationName}}.
+			</a>
+		</p>
+	{% elseif userIsSponsor %}
+		<p>Awaiting confirmation from the project team.</p>
+	{% endif %}
+
+{% elseif contribution.status == constant('\\Exposure\\Model\\SponsorContribution::STATUS_PROPOSAL_APPROVED') %}
+	<p>{{organisationName}} have agreed to fulfill this need in exchange for the following:
+	{{need.return.description.stringByLanguageCode(session.language)}}.</p>
+	{% if userIsProjectOwner %}
+		<p>Awaiting contribution from {{organisationName}}.</p>
+	{% elseif userIsSponsor %}
+		<p id="contribution-mark-sent">
+			<a href="#" 
+				data-op="contribution-mark-sent" 
+				data-contribution-id="{{contribution.id}}" 
+				data-token="{{session.token}}" 
+				data-question="Do you confirm that {{organisationName}} have made their contribution?"
+				data-yes-label="{{organisationName}} have made their contribution"
+				data-no-label="{{organisationName}} have not yet made their contribution"
+				data-success-notification-text="Thank you for your contribution, the project team has been notified."
+				data-success-text="{{organisationName}} have made their contribution, the project team has been notified."
+				data-success-text-id="contribution-mark-sent">
+				{{organisationName}} have made their contribution to this need.
+			</a>
+		</p>
+	{% endif %}
+
+{% elseif contribution.status == constant('\\Exposure\\Model\\SponsorContribution::STATUS_SENT') %}
+	<p>{{organisationName}} have indicated that they have fulfilled this need in exchange for the following:
+	{{need.return.description.stringByLanguageCode(session.language)}}.</p>
+	{% if userIsProjectOwner %}
+		<p id="contribution-mark-received">
+			<a href="#" 
+				data-op="contribution-mark-received" 
+				data-contribution-id="{{contribution.id}}" 
+				data-token="{{session.token}}" 
+				data-question="Do you confirm that you have received the contribution from {{organisationName}}?"
+				data-yes-label="I have received the contribution from {{organisationName}}"
+				data-no-label="I have not received the contribution from {{organisationName}}"
+				data-success-notification-text="Thank you for your confirmation, {{organisationName}} have been notified."
+				data-success-text="The contribution has been received, {{organisationName}} have been notified."
+				data-success-text-id="contribution-mark-received">
+				I confirm that I have received this contribution from {{organisationName}}.
+			</a>
+		</p>
+	{% elseif userIsSponsor %}
+		<p>Awaiting confirmation from the project team.</p>
+	{% endif %}
+
+{% elseif contribution.status == constant('\\Exposure\\Model\\SponsorContribution::STATUS_RECEIVED') %}
+ 	<p>{{organisationName}} have fulfilled this need in exchange for the following:
+	{{need.return.description.stringByLanguageCode(session.language)}}.</p>
+{% endif %}
+
+<script type="text/javascript" src="/assets/js/askAndPost.js"></script>
+{% endblock %}

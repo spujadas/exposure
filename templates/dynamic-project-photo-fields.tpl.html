@@ -1,0 +1,80 @@
+{#
+   This file is part of the Exposure package.
+
+   Copyright 2013 by Sébastien Pujadas
+
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+#}
+
+{# Don't try this at home... ever! #}
+
+{% extends "dynamic-fields.tpl.html" %}
+
+{% block preLoad %}
+<script src="/assets/js/vendor/jquery.ui.widget.js"></script>
+<script src="/assets/js/jquery.iframe-transport.js"></script>
+<script src="/assets/js/jquery.fileupload.js"></script>
+{% endblock %}
+
+{% block initDivPreHook %}
+uploadOnChange($(this).find(activeFieldSelector)) ;
+{% endblock %}
+
+{% block removeDiv %}
+    var photoId = div.find('input[name="photo_ids[]"]').attr('value') ;
+    if (photoId === '') { return ; }
+    var postData = {
+      {% if project.id is not null %}project_id: '{{ project.id }}',{% endif %}
+      token: '{{ session.token }}',
+      action: 'project_photo_delete',
+    } ;
+    postData.photo_id = photoId ;
+
+    $.post(
+      '/',
+      postData, 
+      function(data) { 
+        if ((data !== null) && (data.deleted === true)) { 
+          {{ parent() }} 
+        } 
+      ;}, 
+      'json') ;
+{% endblock %}
+
+{% block addDivPostHook %}
+    uploadOnChange(bi.find(activeFieldSelector)) ;
+{% endblock %}
+
+{% block callbackFunctions %}
+function uploadOnChange(input) {
+  input.fileupload({
+    dataType: 'json',
+    url: '/',
+    dropZone: null,
+    formData: {
+      {% if project.id is not null %}project_id: '{{ project.id }}',{% endif %}
+      photo_id: input.closest('.file_upload').find('input[name="photo_ids[]"]').attr('value'),
+      token: '{{ session.token }}',
+      action: 'project_photo_upsert',
+    },
+    done: function (e, data) {
+      if (data.result.upserted) {
+        var thumbnail = $(this).closest('.file_upload').find('img.photo-thumbnail') ;
+        var imgSrc = '/project-photo/{% if project.urlSlug is not null %}{{ project.urlSlug }}/{% endif %}' + data.result.id {% if project.urlSlug is not null %}+ '/current'{% endif %} ;
+        if (thumbnail.length) {
+          thumbnail.attr('src', imgSrc + '?' + Math.random()) ;
+        }
+        else {
+          $(this).closest('.file_upload').find('input[type="file"]').before('<img src="' + imgSrc + '"  class="photo-thumbnail" width="120"/>');
+          $(this).closest('.file_upload').find('input[name="photo_ids[]"]').attr('value', data.result.id);
+        }
+        $(this).closest('.file_upload').find('strong.error').remove() ;
+      }
+      else if (data.result.error) {
+        $(this).after('<strong class="error">' + data.result.error.photo + '</strong>') ;
+      }
+    }
+  });
+}
+{% endblock %}

@@ -1,0 +1,42 @@
+{#
+   This file is part of the Exposure package.
+
+   Copyright 2013 by Sébastien Pujadas
+
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+#}
+
+{% from 'view_macros.tpl.html' import currency_value %}
+
+{% if financialneed.needsByAmount|length == 0 %}
+	<p>No financial needs by amount.</p>
+{% else %}
+	<p>Needs by amount (current total: {{currency_value(financialneed.sumOfParts(), session.currency)}})</p>
+	<ul class="list-group">
+	{% for need in financialneed.needsByAmount %}
+		<li class="financial-need-by-amount list-group-item">
+			<p>{{currency_value(need.amount, session.currency)}} – {{need.description.stringByLanguageCode(session.language)}}
+			{% if need.isFulfilled() %}
+				<strong>– Sponsored</strong>
+			{% else %}
+				<a href="/financial-need-by-amount-edit/{{need.id}}">Edit</a>
+				<a 
+					data-token="{{ session.token }}"
+					data-need-id="{{ need.id }}"
+					data-op="financial-need-by-amount-delete" href="#">
+					Delete
+				</a>
+			{% endif %}</p>
+			{% if need.return is null %}
+				<a href="/return-new/financial-need-by-amount/{{need.id}}">Define compensation</a>
+			{% else %}
+				<p><a href="/return/{{need.return.id}}">Compensation</a> — ({{need.return.type.description.stringByLanguageCode(session.language)}}) {{need.return.description.stringByLanguageCode(session.language)}}</p>
+			{% endif %}
+		</li>
+	{% endfor %}
+	</ul>
+	<script type="text/javascript" src="/assets/js/needs.js"></script>
+
+{% endif %}
+

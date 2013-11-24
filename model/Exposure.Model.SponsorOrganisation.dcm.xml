@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+   This file is part of the Exposure package.
+ 
+   Copyright 2013 by Sébastien Pujadas
+ 
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+-->
+
+<doctrine-mongo-mapping xmlns="http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping
+                    http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping.xsd">
+
+    <document name="Exposure\Model\SponsorOrganisation" collection="sponsororganisations">
+        <field name="urlSlug" type="string" unique="true" />
+        <field name="creationDateTime" type="date" />
+        <embed-one field="description" target-document="Sociable\Model\MultiLanguageString"/>
+        <reference-one field="logo" target-document="Sociable\Model\LabelledImage"/>
+        <embed-one field="contactDetails" target-document="Sociable\Model\ContactDetails"/>
+        <embed-many field="webPresences" target-document="Sociable\Model\WebPresence"/>
+        <reference-many field="soughtThemes" target-document="Exposure\Model\Theme" />
+        <embed-one field="soughtContributionTypes" target-document="Exposure\Model\SponsorContributionTypes" />
+        <reference-many field="soughtSponsorReturnTypes" target-document="Exposure\Model\SponsorReturnType" />
+        <reference-many field="sponsorUsers" target-document="Exposure\Model\User" inversed-by="sponsorOrganisations" />
+        <reference-many field="notifications">
+            <discriminator-map>
+                <discriminator-mapping value="sponsorContribution"
+                                       class="Exposure\Model\SponsorContributionNotification" />
+                <discriminator-mapping value="sponsorReturn"
+                                       class="Exposure\Model\SponsorReturnNotification" />
+                <discriminator-mapping value="comment"
+                                       class="Exposure\Model\CommentNotification" />
+            </discriminator-map>
+        </reference-many>
+        <reference-many field="wants" target-document="Exposure\Model\ProjectWant" 
+                        mapped-by="sponsorOrganisation"/>
+        <reference-many field="contributions" target-document="Exposure\Model\SponsorContribution" 
+                        mapped-by="contributor"/>
+        <reference-many field="comments" target-document="Exposure\Model\CommentOnSponsorOrganisation" 
+                        mapped-by="sponsorOrganisation"/>
+    </document>
+
+</doctrine-mongo-mapping>

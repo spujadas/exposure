@@ -1,0 +1,87 @@
+{#
+   This file is part of the Exposure package.
+
+   Copyright 2013 by Sébastien Pujadas
+
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+#}
+
+{% extends "page-admin.tpl.html" %}
+
+{% block content %}
+
+<h1>Profile moderation</h1>
+
+<h4>User type</h4>
+<p>{% if user.type ==  constant('\\Exposure\\Model\\User::TYPE_PROJECT_OWNER') %}
+  Project owner
+  {% elseif user.type ==  constant('\\Exposure\\Model\\User::TYPE_SPONSOR') %}
+  Sponsor
+  {% endif %}</p>
+
+<h4>Name</h4>
+<p>{{ user.name }}</p>
+
+<h4>Surname</h4>
+<p>{{ user.surname }}</p>
+
+<h4>Email</h4>
+<p>{{ user.email }}</p>
+
+<h4>Location</h4>
+<p>{{ locationtree|join(' > ') }}</p>
+
+<h4>Photo</h4>
+<p><a href="/profile-photo/{{user.id}}"><img src="/profile-photo/{{user.id}}" width="200" /></a></p>
+
+<h4>Presentation</h4>
+<p>{{ user.presentation.stringByLanguageCode(session.language) }}</p>
+
+<h4>Status</h4>
+{% if user.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_USER_EDIT') %}
+<p><strong>Profile is being edited by the user</strong></p>
+{% else %}
+	<form role="form" class="form-horizontal" method="post" action="/">
+		{% if user.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_SUBMITTED') %}
+		<p><strong>Profile submitted for publication.</strong></p>
+		<button type="submit" class="btn btn-primary" name="approve">Approve</button>
+		<p>
+			<label for="comment">Comment (optional)</label>
+			<textarea id="comment" class="form-control" type="text" name="comment" maxlength="140"></textarea>
+			<button type="submit" class="btn btn-default" name="request_editing">Request editing</button>
+			<button type="submit" class="btn btn-default" name="reject">Reject (final)</button>
+		</p>
+		{% elseif user.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_FLAGGED') %}
+		<p><strong>Profile flagged as inappropriate.</strong></p>
+		<button type="submit" class="btn btn-default" name="approve">Approve</button>
+		<p>
+			<label for="comment">Comment (optional)</label>
+			<textarea id="comment" class="form-control" type="text" name="comment" maxlength="140"></textarea>
+			<button type="submit" class="btn btn-default" name="request_editing">Request editing</button>
+			<button type="submit" class="btn btn-default" name="reject">Reject (final)</button>
+		</p>
+		{% elseif user.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_APPROVED') %}
+		<p><strong>Profile is approved.</strong></p>
+		<p>
+			<label for="comment">Comment (optional)</label>
+			<textarea id="comment" class="form-control" type="text" name="comment" maxlength="140"></textarea>
+			<button type="submit" class="btn btn-default" name="request_editing">Request editing</button>
+			<button type="submit" class="btn btn-default" name="reject">Reject (final)</button>
+		</p>
+		{% elseif user.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_REJECTED') %}
+		<p><strong>Profile is rejected.</strong></p>
+		<p>
+			<label for="comment">Comment (optional)</label>
+			<textarea id="comment" class="form-control" type="text" name="comment" maxlength="140"></textarea>
+			<button type="submit" class="btn btn-default" name="approve">Approve</button>
+			<button type="submit" class="btn btn-default" name="request_editing">Request editing</button>
+		</p>
+		{% endif %}
+	<input type="hidden" name="user_id" value="{{ user.id }}" />
+	<input type="hidden" name="token" value="{{ session.token }}" />
+	<input type="hidden" name="action" value="admin_profile_moderate" />
+	</form>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,96 @@
+{#
+   This file is part of the Exposure package.
+
+   Copyright 2013 by Sébastien Pujadas
+
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+#}
+
+{% from 'form_macros.tpl.html' import error, autofill, error_class %}
+
+{% extends "page.tpl.html" %}
+
+{% block content %}
+
+<h1>Sign up</h1>
+<form role="form" class="form-horizontal" method="post" action="/">
+	
+<div class="form-group{{ error_class(session.errors, 'usertype') }}">
+	<label class="col-lg-2 control-label">Role</label>
+	<div class="col-lg-10">
+		<div class="radio">
+			<label>
+				<input type="radio" name="usertype" value="projectowner" {% if (session.autofill.usertype == "projectowner") or not (session.autofill.usertype is defined) %} checked="checked" {% endif %} /> 
+				Project owner
+			</label>
+		</div>
+		<div class="radio">
+			<label>
+				<input type="radio" name="usertype" value="sponsor" {% if session.autofill.usertype == "sponsor" %} checked="checked" {% endif %}/> 
+				Sponsor
+			</label>
+		</div>
+		{{ error(session.errors, 'usertype') }}
+	</div>
+</div>
+
+<div class="form-group{{ error_class(session.errors, 'email') }}">
+	<label class="col-lg-2 control-label" for="email">Email address</label>
+	<div class="col-lg-10">
+		<input type="text" class="form-control" id="email" name="email" placeholder="Type in your email address" 
+		       maxlength="254" value="{{ autofill(session.autofill, 'email') }}" />
+		{{ error(session.errors, 'email') }}
+	</div>
+</div>
+
+<div class="form-group{{ error_class(session.errors, 'email_check') }}">
+	<label class="col-lg-2 control-label" for="email">Email address (confirm)</label>
+	<div class="col-lg-10">
+		<input type="text" class="form-control" id="email_check" name="email_check" placeholder="Type in your email address (again)" 
+		       maxlength="254" value="{{ autofill(session.autofill, 'email_check') }}" />
+		{{ error(session.errors, 'email_check') }}
+	</div>
+</div>
+
+<div class="form-group{{ error_class(session.errors, 'password') }}">
+	<label class="col-lg-2 control-label" for="password">Password</label>
+	<div class="col-lg-10">
+		<input type="password" class="form-control" id="password" name="password" placeholder="Type in a password" />
+		{{ error(session.errors, 'password') }}
+	</div>
+</div>
+
+<div class="form-group{{ error_class(session.errors, 'password_check') }}">
+	<label class="col-lg-2 control-label" for="password">Password (confirm)</label>
+	<div class="col-lg-10">
+		<input type="password" class="form-control" id="password_check" name="password_check" placeholder="Type in the same password" />
+		{{ error(session.errors, 'password_check') }}
+	</div>
+</div>
+
+
+<div class="form-group{{ error_class(session.errors, 'tcs') }}">
+    <div class="col-sm-offset-2 col-sm-10">
+		<div class="checkbox">
+			<label>
+				<input type="checkbox" name="terms_and_conditions_accepted" value="y">I have read and accept the terms and conditions</input>
+				{{ error(session.errors, 'tcs') }}
+			</label>
+		</div>
+    </div>
+  </div>
+
+<div class="form-group">
+	<div class="col-sm-offset-2 col-sm-10">
+		<button type="submit" class="btn btn-primary">Sign up</button>
+	</div>
+</div>
+
+<input type="hidden" name="token" value="{{ session.token }}" />
+<input type="hidden" name="action" value="user_signup" />
+
+</form>
+
+
+{% endblock %}

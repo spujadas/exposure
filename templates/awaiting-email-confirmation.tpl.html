@@ -1,0 +1,21 @@
+{#
+   This file is part of the Exposure package.
+
+   Copyright 2013 by Sébastien Pujadas
+
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+#}
+
+{% extends "page.tpl.html" %}
+
+{% block content %}
+<p>Thanks for signing up.</p>
+<p>We have sent you an email with a confirmation link. Please click on it to finalise the sign-up process.</p>
+
+<form role="form" class="form-horizontal" method="post" action="/">
+    <button type="submit" class="btn btn-primary">Resend confirmation email</button>
+    <input type="hidden" name="token" value="{{ session.token }}" />
+    <input type="hidden" name="action" value="resend_confirmation_email" />
+</form>
+{% endblock %}

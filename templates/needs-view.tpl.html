@@ -1,0 +1,37 @@
+{#
+   This file is part of the Exposure package.
+
+   Copyright 2013 by Sébastien Pujadas
+
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+#}
+
+{% from 'view_macros.tpl.html' import currency_value %}
+
+{% extends "page-left-nav.tpl.html" %}
+
+{% block content %}
+
+<h1>{{project.name}}</h1>
+
+<h2>Financial needs</h2>
+
+{% set financialneed = project.financialNeed %}
+
+{% if financialneed is null %}
+	<p>No financial needs.</p>
+	<p><a href="/financial-need-new/{{project.urlSlug}}">Add a financial need</a></p>
+{% else %}
+	<p>Total financial need: {{ currency_value(financialneed.totalAmount, session.currency) }} 
+		<a href="/financial-need-edit/{{financialneed.id}}">Edit</a></p>
+	{% include 'financial-need-list-items.inc.tpl.html' %}
+	<p><a href="/financial-need-by-amount-new/{{financialneed.id}}">Add a financial need by amount</a></p>
+{% endif %}
+
+<h2>Non-financial needs</h2>
+{% include 'non-financial-needs-list-items.inc.tpl.html' %}
+<p><a href="/non-financial-need-new/{{project.urlSlug}}">Add a non-financial need</a></p>
+
+<a href="/project/{{project.urlSlug}}">Back to project page</a></p>
+{% endblock %}

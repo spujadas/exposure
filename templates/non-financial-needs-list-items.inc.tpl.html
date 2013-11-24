@@ -1,0 +1,35 @@
+{#
+   This file is part of the Exposure package.
+
+   Copyright 2013 by Sébastien Pujadas
+
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+#}
+
+{% if project.nonFinancialNeeds|length == 0 %}
+	<p>No non-financial needs.</p>
+{% else %}
+	<ul class="list-group">
+	{% for need in project.nonFinancialNeeds %}
+		<li class="non-financial-need list-group-item">{{need.description.stringByLanguageCode(session.language)}}
+			{% if need.isFulfilled() %}
+				<strong>– Sponsored</strong>
+			{% else %}
+				<a href="/non-financial-need-edit/{{need.id}}">Edit</a>
+				<input type="hidden" name="non_financial_need_id" value="{{ need.id }}" />
+				<input type="hidden" name="token" value="{{ session.token }}" />
+				<a data-op="non-financial-need-delete" href="#">Delete</a>
+			{% endif %}
+			{% if need.return is null %}
+				<a href="/return-new/non-financial-need/{{need.id}}">Define compensation</a>
+			{% else %}
+				<p><a href="/return/{{need.return.id}}">Compensation</a> — ({{need.return.type.description.stringByLanguageCode(session.language)}}) {{need.return.description.stringByLanguageCode(session.language)}}</p>
+			{% endif %}
+		</li>
+	{% endfor %}
+	</ul>
+
+<script type="text/javascript" src="/assets/js/needs.js"></script>
+
+{% endif %}

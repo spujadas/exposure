@@ -1,0 +1,157 @@
+{#
+   This file is part of the Exposure package.
+
+   Copyright 2013 by Sébastien Pujadas
+
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+#}
+
+{% from 'view_macros.tpl.html' import currency_value %}
+
+<h4>Project owners</h4>
+<ul class="list-group">
+	{% for projectOwner in project.owners if projectOwner.moderationStatus.status == constant('\\Exposure\\Model\\ModerationStatus::STATUS_APPROVED') %}
+		<li class="list-group-item"><a href="/profile/{{projectOwner.id}}">{{projectOwner.name}} {{projectOwner.surname}}</a></li>
+	{% else %}
+		<li class="list-group-item">The project owners' profile haven't been published yet.</li>
+	{% endfor %}
+</ul>
+
+{% if project.financialNeed is not null %}
+	<h4>Financial needs</h4>
+
+	<p>Total financial needs: {{ currency_value(project.financialNeed.totalAmount, session.currency) }}</p>
+
+	<p>Financial needs by amount:</p>
+	<ul id="financial-needs-by-amount" class="list-group">
+		<input type="hidden" name="token" value="{{ session.token }}" />
+		{% for need in project.financialNeed.needsByAmount %}
+			<li class="list-group-item">{{currency_value(need.amount, session.currency)}} – {{need.description.stringByLanguageCode(session.language)}}
+				{% if need.isFulfilled() %}
+					<strong>– Sponsored {% if user and need.isFulfilledByOrganisationWithUser(user) %}by {{need.contribution.contributor.name}}{% endif %}</strong>
+				{% endif %}
+				
+				{% if need.return is null %}
+					<p>No compensation defined</p>
+				{% else %}
+					<p>Compensation – ({{need.return.type.description.stringByLanguageCode(session.language)}}) {{need.return.description.stringByLanguageCode(session.language)}}</p>
+					{% if userIsSponsor %}
+						{% for organisation in user.sponsorOrganisations %}
+							{% if organisation.wantsProject(project) and not need.isFulfilled() %}
+								<p id="financial-need-by-amount-{{need.id}}">
+									<a href="#" 
+										data-op="need-contribute" 
+										data-need-type="financial-need-by-amount" 
+										data-need-id="{{need.id}}" 
+										data-organisation-id="{{organisation.id}}" 
+										data-project-id="{{project.id}}"
+										data-token="{{session.token}}" 
+										data-question="Does {{ organisation.name }} want to contribute to this need, thus sponsoring project {{project.name}}?"
+										data-yes-label="Yes, {{organisation.name}} wants to contribute"
+										data-no-label="No, {{organisation.name}} does not want to contribute"
+										data-success-notification-text="Thank you, the project owners have been notified."
+										data-success-text="You have confirmed that {{organisation.name}} wants to contribute to this need, the project owners have been notified."
+										data-success-text-id="financial-need-by-amount-{{need.id}}"
+									>
+										{{organisation.name}} wants to contribute to this need
+									</a>
+								</p>
+							{% endif %}
+						{% endfor %}
+					{% endif %}
+				{% endif %}
+			</li>
+		{% endfor %}
+	</ul>
+{% endif %}
+
+{% if project.nonFinancialNeeds.count > 0 %}
+	<h4>Non-financial needs</h4>
+	<ul id="non-financial-needs" class="list-group">
+	<input type="hidden" name="token" value="{{ session.token }}" />
+	{% set needtypes = {
+		(constant('\\Exposure\\Model\\ProjectNeed::TYPE_EQUIPMENT')): 'equipment',
+		(constant('\\Exposure\\Model\\ProjectNeed::TYPE_SERVICE')): 'service'
+		}
+	%}
+	{% for need in project.nonFinancialNeeds %}
+		<li class="list-group-item">{{need.description.stringByLanguageCode(session.language)}} ({{needtypes[need.type]}})
+			{% if need.isFulfilled() %}
+				<strong>– Sponsored {% if user and need.isFulfilledByOrganisationWithUser(user) %}by {{need.contribution.contributor.name}}{% endif %}</strong>
+			{% endif %}
+
+			{% if need.return is null %}
+				<p>No return defined</p>
+			{% else %}
+				<p>Return — ({{need.return.type.description.stringByLanguageCode(session.language)}}) {{need.return.description.stringByLanguageCode(session.language)}}</p>
+				{% if userIsSponsor %}
+					{% for organisation in user.sponsorOrganisations %}
+						{% if organisation.wantsProject(project) and not need.isFulfilled() %}
+							<p id="non-financial-need-{{need.id}}">
+								<a href="#" 
+									data-op="need-contribute" 
+									data-need-type="non-financial-need" 
+									data-need-id="{{need.id}}" 
+									data-organisation-id="{{organisation.id}}" 
+									data-project-id="{{project.id}}"
+									data-token="{{session.token}}" 
+									data-question="Does {{ organisation.name }} want to contribute to this need, thus sponsoring project {{project.name}}?"
+									data-yes-label="Yes, {{organisation.name}} wants to contribute"
+									data-no-label="No, {{organisation.name}} does not want to contribute"
+									data-success-notification-text="Thank you, the project owners have been notified."
+									data-success-text="You have confirmed that {{organisation.name}} wants to contribute to this need, the project owners have been notified."
+									data-success-text-id="non-financial-need-{{need.id}}"
+								>
+									{{organisation.name}} wants to contribute to this need
+								</a>
+							</p>
+						{% endif %}
+					{% endfor %}
+				{% endif %}
+			{% endif %}
+		</li>
+	{% endfor %}
+	</ul>
+{% endif %}
+
+{% if userIsSponsor %}
+	{% for organisation in user.sponsorOrganisations %}
+		{% if organisation.wantsProject(project) %}
+			<p>{{organisation.name}} is interested by this project.</p>
+		{% else %}
+			<p id="want-{{organisation.id}}">
+				<a href="#" 
+					data-op="want" 
+					data-organisation-id="{{organisation.id}}" 
+					data-project-id="{{project.id}}"
+					data-token="{{session.token}}" 
+					data-question="<p>Is {{ organisation.name }} interested by this project?</p><p>If so then the project owners will be notified and will be able to see the organisation's file, including contact details.</p>"
+					data-yes-label="Yes, {{organisation.name}} is interested by this project"
+					data-no-label="No, {{organisation.name}} is not interested by this project"
+					data-success-notification-text="Thank you, the project owners have been notified."
+					data-success-text="You have confirmed that {{organisation.name}} is interested by this project, the project owners have been notified."
+					data-success-text-id="want-{{organisation.id}}"
+				>
+					{{organisation.name}} is interested by this project
+				</a>
+			</p>
+		{% endif %}
+	{% endfor %}
+	{% if project in user.bookmarkedProjects %}
+		<p>You have bookmarked this project</p>
+	{% else %}
+		<p id="sponsor-bookmark">
+			<a href="#" 
+				data-op="bookmark-add" 
+				data-token="{{session.token}}"
+				data-project-id="{{project.id}}"
+				data-success="You have bookmarked this project">
+				Bookmark this project
+			</a>
+		</p>
+		<script type="text/javascript" src="/assets/js/bookmark.js"></script>
+	{% endif %}
+
+	<script type="text/javascript" src="/assets/js/askAndPost.js"></script>
+{% endif %}

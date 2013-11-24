@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+   This file is part of the Exposure package.
+ 
+   Copyright 2013 by Sébastien Pujadas
+ 
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+-->
+
+<doctrine-mongo-mapping xmlns="http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping"
+                        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                        xsi:schemaLocation="http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping
+                    http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping.xsd">
+
+    <document name="Exposure\Model\Theme" collection="themes">
+        <field name="id" id="true" />
+        <field name="label" type="string" unique="true"/>
+        <field name="path" type="string" index="true"/>
+        <embed-one field="name" target-document="Sociable\Model\MultiLanguageString"/>
+        <reference-one field="parentTheme" target-document="Exposure\Model\Theme" inversed-by="childrenThemes"/>
+        <reference-many field="childrenThemes" target-document="Exposure\Model\Theme" mapped-by="parentTheme"/>
+        <reference-one field="descriptionStructure" target-document="Exposure\Model\DescriptionStructure" mapped-by="theme"/>
+        <reference-many field="sponsorReturnsOnFinancialContribution" 
+                        target-document="Exposure\Model\SponsorReturnOnFinancialContribution" 
+                        mapped-by="theme"/>
+        <lifecycle-callbacks>
+            <lifecycle-callback type="preRemove" method="checkForOrphansBeforeRemove" />
+        </lifecycle-callbacks>
+    </document>        
+</doctrine-mongo-mapping>

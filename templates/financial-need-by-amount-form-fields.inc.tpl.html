@@ -1,0 +1,36 @@
+{#
+   This file is part of the Exposure package.
+
+   Copyright 2013 by Sébastien Pujadas
+
+   For the full copyright and licence information, please view the LICENCE
+   file that was distributed with this source code.
+#}
+
+{% from 'form_macros.tpl.html' import error, error_class %}
+
+<div class="form-group{{ error_class(session.errors, 'amount_value') }}">
+	<label class="col-lg-2 control-label" for="amount_value">Amount in {{currency}}</label>
+	<div class="col-lg-10">
+		<input class="form-control" id="amount_value" name="amount_value" 
+			placeholder="amount in {{ currency }}" value="{{ value_form }}"/>
+		{{ error(session.errors, 'amount_value') }}
+		<input type="hidden" name="currency" value="{{ currency }}"/>
+	</div>
+</div>
+
+<div class="form-group{{ error_class(session.errors, 'description') }}">
+	<label class="col-lg-2 control-label" for="description">Description</label>
+	<div class="col-lg-10">
+		<textarea class="form-control" name="description" id="description" 
+		maxlength="{{constant('\\Exposure\\Model\\ProjectNeed::DESCRIPTION_MAX_LENGTH')}}"
+		placeholder="description of this need">{{ description_form }}</textarea>
+		{{ error(session.errors, 'description') }}
+	</div>
+</div>
+
+<div class="form-group">
+	<div class="col-sm-offset-2 col-sm-10">
+		<button type="submit" class="btn btn-primary">Save</button>
+	</div>
+</div>
